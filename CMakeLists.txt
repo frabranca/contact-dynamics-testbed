@@ -3,12 +3,10 @@ project(franka_driver)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#find_package(lcm REQUIRED)
 find_package(Franka REQUIRED)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
-  #${Franka_INCLUDE_DIRS}
 )
   
 add_executable(torque_control 
