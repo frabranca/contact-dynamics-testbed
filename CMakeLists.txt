@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.20)
+project(franka_driver)
+
+set(CMAKE_CXX_STANDARD 17)
+
+#find_package(lcm REQUIRED)
+find_package(Franka REQUIRED)
+
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src
+  #${Franka_INCLUDE_DIRS}
+)
+  
+add_executable(torque_control 
+	src/torque_control.cpp)
+	
+target_link_libraries(torque_control
+	${Franka_LIBRARIES}
+	${LCM_NAMESPACE}lcm)

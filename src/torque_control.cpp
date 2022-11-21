@@ -13,7 +13,7 @@
 #include <franka/robot.h>
 #include <franka/gripper.h>
 
-#include "examples_common.cpp"
+#include <utils/common_functions.cpp>
 #include <lcm/lcm-cpp.hpp>
 #include "exlcm/command.hpp"
 #include "exlcm/state.hpp"
@@ -102,9 +102,9 @@ try {
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
         
-        msg_to_send.width = gripper_state.width;
-        msg_to_send.max_width = gripper_state.max_width;
-        msg_to_send.is_grasped = gripper_state.is_grasped;
+        //msg_to_send.width = gripper_state.width;
+        //msg_to_send.max_width = gripper_state.max_width;
+        //msg_to_send.is_grasped = gripper_state.is_grasped;
 
         lcm.publish("STATE", &msg_to_send);
 
