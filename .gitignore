@@ -1,2 +1,6 @@
 /src/exlcm
 /build
+/src/send_command.py
+/src/robot_mock.py
+/src/torque_control_gripper.torque_control_gripper
+/src/motion.cpp
