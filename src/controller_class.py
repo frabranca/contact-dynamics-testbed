@@ -50,29 +50,27 @@ class Controller:
         self.is_grasped = st.is_grasped
 
     def control_loop(self):
-        try:
-            start_time = time.time()
-            while True:
-                self.lc.handle()
-                cmd = command()
+        start_time = time.time()
+        while True:
+            self.lc.handle()
+            cmd = command()
 
-                # control logic
-                cmd.tau_J_d = self.tau_J_d
+            # control logic
+            cmd.tau_J_d = self.tau_J_d
+            self.lc.publish(self.channel_command, cmd.encode())
+            
+            if self.save_output:
+                self.tau_J_save.append(self.tau_J)
+                self.time_save.append(time.time() - start_time)
+            if (time.time() - start_time)>10.:
+                break
 
-                if self.save_output:
-                    self.tau_J_saved.append(self.tau_J)
-                    self.time_save.append(time.time() - start_time)
-
-                self.lc.publish(self.channel_command, cmd.encode())
-
-        except KeyboardInterrupt:
-            pass 
     
     def write_output(self):
         output = open("output", "w")
         for i in range(len(self.tau_J_save)):
-            output.write(str(self.time_save[i]) + ' ' + str(self.tau_J_save[i]) + '\n')
+            output.write(str(self.time_save[i]) + ' ' + ' '.join(map(str, self.tau_J_save[i])) + '\n')
         output.close()
         
 if __name__ == "__main__":
-    controller = Controller("STATE", "COMMAND")    
+    controller = Controller("STATE", "COMMAND", save_output=True)    
