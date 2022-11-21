@@ -1,0 +1,16 @@
+package exlcm;
+
+struct state
+{
+   double q[7];
+   double q_d[7];
+   double dq[7];
+   double dq_d[7];
+   double ddq_d[7];
+   double tau_J[7];
+   double tau_J_d[7];
+   double dtau_J[7];
+   double width;
+   double max_width;
+   boolean is_grasped;
+}

@@ -1,0 +1,9 @@
+package exlcm;
+
+struct command
+{ 
+    double tau_J_d[7];
+    double width;
+}
+
+
