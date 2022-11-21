@@ -6,14 +6,14 @@ import numpy as np
 class Controller:
     def __init__(self):
         # initiate state variables as zeros
-        self.q = [0.0 for dim0 in range(7)]
-        self.q_d = [0.0 for dim0 in range(7) ]
-        self.dq = [0.0 for dim0 in range(7) ]
-        self.dq_d = [0.0 for dim0 in range(7) ]
-        self.ddq_d = [0.0 for dim0 in range(7) ]
-        self.tau_J = [0.0 for dim0 in range(7) ]
-        self.tau_J_d = [0.0 for dim0 in range(7) ]
-        self.dtau_J = [ 0.0 for dim0 in range(7) ]
+        self.q = 0
+        self.q_d = 0
+        self.dq = 0
+        self.dq_d = 0
+        self.ddq_d = 0
+        self.tau_J = 0
+        self.tau_J_d = 0
+        self.dtau_J = 0
         self.width = 0.0
         self.max_width = 0.0
         self.is_grasped = False
@@ -48,10 +48,11 @@ class Controller:
                 cmd = command()
 
                 # control logic
-                cmd.tau_J_d = [0.0 for dim0 in range(7)]
+                cmd.tau_J_d = self.tau_J_d
                 self.lc.publish(self.channel_command, cmd.encode())
 
         except KeyboardInterrupt:
             pass 
+        
 if __name__ == "__main__":
     controller = Controller()    
