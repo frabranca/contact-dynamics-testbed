@@ -87,9 +87,7 @@ try {
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
         torque_control =
             [&](const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
-        
-        Handler handlerObject;
-        lcm.subscribe("COMMAND", &Handler::handleMessage, &handlerObject);
+            
         
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
@@ -123,6 +121,8 @@ try {
     // gripper.grasp(0.02, 10.0, 60);
     // std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
     robot.control(torque_control);
+    
+    //franka::GripperState gripper_state = gripper.readOnce();
 
     
     // double grasping_width = 0.02;
