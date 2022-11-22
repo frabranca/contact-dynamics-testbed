@@ -1,6 +1,6 @@
 package exlcm;
 
-struct state
+struct robot_state
 {
    double q[7];
    double q_d[7];
@@ -10,8 +10,5 @@ struct state
    double tau_J[7];
    double tau_J_d[7];
    double dtau_J[7];
-   double width;
-   double max_width;
-   boolean is_grasped;
    boolean loop_closed;
 }

@@ -9,9 +9,10 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src
 )
   
-add_executable(torque_control 
-	src/torque_control.cpp)
+add_executable(robot_control 
+	src/torque_control.cpp
+	src/gripper_control.cpp)
 	
-target_link_libraries(torque_control
+target_link_libraries(robot_control
 	${Franka_LIBRARIES}
 	${LCM_NAMESPACE}lcm)

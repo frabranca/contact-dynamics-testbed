@@ -11,20 +11,18 @@
 #include <franka/exception.h>
 #include <franka/rate_limiting.h>
 #include <franka/robot.h>
-#include <franka/gripper.h>
 
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
-#include "exlcm/command.hpp"
-#include "exlcm/state.hpp"
+#include "exlcm/robot_command.hpp"
+#include "exlcm/robot_state.hpp"
 
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
-    std::array<double, 3> gripper_received;
 };
 
-command_received Command;
+command_received rcm_struct;
 
 // define message handler
 class Handler 
@@ -33,15 +31,11 @@ class Handler
         ~Handler() {}
         void handleMessage(const lcm::ReceiveBuffer* rbuf,
                 const std::string& chan, 
-                const exlcm::command* msg_received){
+                const exlcm::robot_command* msg_received){
               int i;
               for (i=0; i<7; i++){
-                Command.tau_received[i] = msg_received->tau_J_d[i];}
-              for (i=0; i<3; i++){
-                Command.gripper_received[i] = msg_received->gripper[i];}
+                rcm_struct.tau_received[i] = msg_received->tau_J_d[i];}
               }
-              
-
 };
 
 int main(int argc, char** argv) {
@@ -52,20 +46,16 @@ int main(int argc, char** argv) {
   }
 
   lcm::LCM lcm;
-  exlcm::state msg_to_send;
-  uint64_t time = 0;
-  franka::Gripper gripper(argv[1]);
-  gripper.homing();
-  
+  exlcm::robot_state msg_to_send;
+  uint64_t time = 0;  
 
   Handler handlerObject;
-  lcm.subscribe("COMMAND", &Handler::handleMessage, &handlerObject);
+  lcm.subscribe("ROBOT COMMAND", &Handler::handleMessage, &handlerObject);
 
 try {
     // Connect to robot.
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
-    
 
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
@@ -100,7 +90,7 @@ try {
         if (time >= 10000) {
             std::cout << std::endl << "Finished test" << std::endl;
             msg_to_send.loop_closed = true;
-            lcm.publish("STATE", &msg_to_send);
+            lcm.publish("ROBOT STATE", &msg_to_send);
             return franka::MotionFinished(zero_torques);}
 
         for (int i=0; i<7; i++){
@@ -114,18 +104,13 @@ try {
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
 
-        lcm.publish("STATE", &msg_to_send);
+        lcm.publish("ROBOT STATE", &msg_to_send);
         lcm.handle();
         
         // The following line is only necessary for printing the rate limited torque. As we activated
         // rate limiting for the control loop (activated by default), the torque would anyway be
         // adjusted!
-        std::array<double, 7> tau_d_rate_limited = franka::limitRate(franka::kMaxTorqueRate, Command.tau_received, state.tau_J_d);
-
-        // CHANGE TAU_J_D TO TAU_J and see if anything changes
-        //maybe the tau_d_rate_limited output is just the desired torque all the time (?)
-        // test what happens if zero torque is applied !!!
-        // test different impedance values !!!
+        std::array<double, 7> tau_d_rate_limited = franka::limitRate(franka::kMaxTorqueRate, rcm_struct.tau_received, state.tau_J_d);
 
     // Send torque command.
     return tau_d_rate_limited;
@@ -133,22 +118,6 @@ try {
 
     // Start real-time control loop.
     robot.control(torque_control);
-    
-    // Start non-real-time control loop.
-    //std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
-    
-    lcm.handle();
-    std::cout<< Command.gripper_received[0] << std::endl;
-    std::cout<< Command.gripper_received[1] << std::endl;
-    std::cout<< Command.gripper_received[2] << std::endl;
-    gripper.grasp(Command.gripper_received[0], Command.gripper_received[1], Command.gripper_received[2]);
-    
-    //franka::GripperState gripper_state = gripper.readOnce();
-
-    
-    // double grasping_width = 0.02;
-    // gripper.grasp(grasping_width, 0.1, 60);
-    // std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;

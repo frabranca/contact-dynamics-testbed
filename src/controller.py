@@ -1,10 +1,10 @@
 import lcm
-from exlcm import state, command
+from exlcm import robot_state, robot_command, gripper_command
 import time
 import numpy as np
 
 class Controller:
-    def __init__(self, channel_state_name, channel_command_name, save_output=False):
+    def __init__(self, robot_state_channel, robot_command_channel,  gripper_command_channel, save_output=False):
         # initiate state variables as zeros
         self.q = 0
         self.q_d = 0
@@ -14,21 +14,22 @@ class Controller:
         self.tau_J = 0
         self.tau_J_d = 0
         self.dtau_J = 0
-        self.width = 0
-        self.max_width = 0
-        self.is_grasped = False
         self.loop_closed = False
 
+        # lists to save output
+        self.save_output = save_output
         self.tau_J_save = []
         self.time_save = []
-        self.save_output = save_output
 
         # define lcm channels
-        self.channel_state = channel_state_name
-        self.channel_command = channel_command_name
-        self.lc = lcm.LCM()
+        self.robot_state_channel = robot_state_channel
+        self.robot_command_channel = robot_command_channel
+        self.gripper_command_channel = gripper_command_channel
 
-        self.subscription = self.lc.subscribe(self.channel_state, self.my_handler)
+        self.lc = lcm.LCM()
+        self.subscription = self.lc.subscribe(self.channel_state, self.robot_handler)
+
+        # actions
         self.control_loop()
         #self.move_gripper()
         self.lc.unsubscribe(self.subscription)
@@ -36,35 +37,34 @@ class Controller:
         if save_output:
             self.write_output()
 
-    def my_handler(self, channel, data):
-        st = state.decode(data)
-        self.q          = st.q
-        self.q_d        = st.q_d
-        self.dq         = st.dq
-        self.dq_d       = st.dq_d
-        self.ddq_d      = st.ddq_d
-        self.tau_J      = st.tau_J
-        self.tau_J_d    = st.tau_J_d
-        self.dtau_J     = st.dtau_J
-        self.width      = st.width
-        self.max_width  = st.max_width
-        self.is_grasped = st.is_grasped
-        self.loop_closed = st.loop_closed
+    def robot_handler(self, channel, data):
+        rst = robot_state.decode(data)
+        self.q           = rst.q
+        self.q_d         = rst.q_d
+        self.dq          = rst.dq
+        self.dq_d        = rst.dq_d
+        self.ddq_d       = rst.ddq_d
+        self.tau_J       = rst.tau_J
+        self.tau_J_d     = rst.tau_J_d
+        self.dtau_J      = rst.dtau_J
+        self.loop_closed = rst.loop_closed        
 
     def control_loop(self):
         start_time = time.time()
         while True:
             self.lc.handle()
-            cmd = command()
+            rcm = robot_command()
 
             # control logic
-            cmd.tau_J_d = self.tau_J_d
-            cmd.gripper = (0.02,10.0,60.0)
-            self.lc.publish(self.channel_command, cmd.encode())
+            rcm.tau_J_d = self.tau_J_d
+            self.lc.publish(self.robot_command_channel, rcm.encode())
 
             if self.loop_closed:
                 print("loop closed")
                 break
+
+            if round((start_time-time.time()), 2) == 5.0:
+                self.move_gripper()
             
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
@@ -75,9 +75,11 @@ class Controller:
     
     def move_gripper(self):
         #self.lc.handle()
-        cmd = command()
-        cmd.gripper = (0.02,10.0,60.0)
-        self.lc.publish(self.channel_command, cmd.encode())
+        gcm = gripper_command()
+        gcm.width = 0.02 
+        gcm.speed = 10.0 
+        gcm.force = 60.0
+        self.lc.publish(self.gripper_command_channel, gcm.encode())
         print("gripper command sent")
     
     
@@ -89,4 +91,4 @@ class Controller:
         output.close()
         
 if __name__ == "__main__":
-    controller = Controller("STATE", "COMMAND", save_output=False)    
+    controller = Controller("ROBOT STATE", "ROBOT COMMAND", "GRIPPER COMMAND")    

@@ -1,0 +1,8 @@
+package exlcm;
+
+struct gripper_state
+{
+   double width;
+   double speed;
+   double force;
+}
