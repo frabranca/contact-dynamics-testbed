@@ -30,11 +30,11 @@ class Controller:
 
         self.subscription = self.lc.subscribe(self.channel_state, self.my_handler)
         self.control_loop()
+        self.move_gripper()
         self.lc.unsubscribe(self.subscription)
 
         if save_output:
             self.write_output()
-
 
     def my_handler(self, channel, data):
         st = state.decode(data)
@@ -68,6 +68,15 @@ class Controller:
                 break
             # if (time.time() - start_time)>10.:
             #     break
+    
+    def move_gripper(self):
+        self.lc.handle()
+        cmd = command()
+        cmd.gripper_width = 0.02
+        cmd.gripper_speed = 10.0
+        cmd.gripper_force = 60
+        self.lc.publish(self.channel_command, cmd.encode())
+    
     
     def write_output(self):
         output = open("output", "w")

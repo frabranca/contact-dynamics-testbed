@@ -21,6 +21,9 @@
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
+    double gripper_width;
+    double gripper_speed;
+    double gripper_force;
 };
 
 command_received Command;
@@ -123,14 +126,13 @@ try {
     return tau_d_rate_limited;
     };
 
-
     // Start real-time control loop.
     robot.control(torque_control);
     
     // Start non-real-time control loop.
-    
-    gripper.grasp(0.02, 10.0, 60);
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
+    lcm.handle();
+    gripper.grasp(Command.gripper_width, Command.gripper_speed, Command.gripper_force);
     
     //franka::GripperState gripper_state = gripper.readOnce();
 
