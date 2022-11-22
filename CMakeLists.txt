@@ -4,6 +4,7 @@ project(franka_driver)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Franka REQUIRED)
+find_package(lcm REQUIRED)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
@@ -16,9 +17,9 @@ add_executable(gripper_control
 	src/gripper_control.cpp)
 	
 target_link_libraries(torque_control
-	${Franka_LIBRARIES}
-	${LCM_NAMESPACE}lcm)
+	Franka::Franka
+	lcm)
 
 target_link_libraries(gripper_control
-	${Franka_LIBRARIES}
-	${LCM_NAMESPACE}lcm)
+	Franka::Franka
+	lcm)
