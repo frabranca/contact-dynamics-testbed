@@ -81,11 +81,19 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
         
     // Define callback for the joint torque control loop.
-    std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
+    franka::Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+
+    std::function<franka::Torques(const franka::RobotState&, franka::Duration period)>
         torque_control =
             [&](const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
             
-        
+        time += period.toMSec();
+        if (time >= 10000) {
+            std::cout << std::endl << "Finished test" << std::endl;
+            msg_to_send.loop_closed = true;
+            lcm.publish("STATE", &msg_to_send);
+            return franka::MotionFinished(zero_torques);
+
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
             msg_to_send.q_d[i] = state.q_d[i];
@@ -120,8 +128,8 @@ try {
     
     // Start non-real-time control loop.
     
-    // gripper.grasp(0.02, 10.0, 60);
-    // std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
+    gripper.grasp(0.02, 10.0, 60);
+    std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
     
     
     //franka::GripperState gripper_state = gripper.readOnce();
