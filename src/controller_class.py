@@ -17,6 +17,7 @@ class Controller:
         self.width = 0
         self.max_width = 0
         self.is_grasped = False
+        self.loop_closed = False
 
         self.tau_J_save = []
         self.time_save = []
@@ -48,6 +49,7 @@ class Controller:
         self.width      = st.width
         self.max_width  = st.max_width
         self.is_grasped = st.is_grasped
+        self.loop_closed = st.loop_closed
 
     def control_loop(self):
         start_time = time.time()
@@ -62,9 +64,10 @@ class Controller:
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
                 self.time_save.append(time.time() - start_time)
-            if (time.time() - start_time)>10.:
+            if self.loop_closed:
                 break
-
+            # if (time.time() - start_time)>10.:
+            #     break
     
     def write_output(self):
         output = open("output", "w")
