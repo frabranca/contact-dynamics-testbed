@@ -13,7 +13,7 @@
 #include <franka/robot.h>
 #include <franka/gripper.h>
 
-#include <utils/common_functions.cpp>
+#include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
 #include "exlcm/command.hpp"
 #include "exlcm/state.hpp"
@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
 
   lcm::LCM lcm;
   exlcm::state msg_to_send;
+  uint64_t time = 0;
 
   Handler handlerObject;
   lcm.subscribe("COMMAND", &Handler::handleMessage, &handlerObject);
@@ -85,14 +86,14 @@ try {
 
     std::function<franka::Torques(const franka::RobotState&, franka::Duration period)>
         torque_control =
-            [&](const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
+            [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
             
         time += period.toMSec();
         if (time >= 10000) {
             std::cout << std::endl << "Finished test" << std::endl;
             msg_to_send.loop_closed = true;
             lcm.publish("STATE", &msg_to_send);
-            return franka::MotionFinished(zero_torques);
+            return franka::MotionFinished(zero_torques);}
 
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
@@ -130,7 +131,6 @@ try {
     
     gripper.grasp(0.02, 10.0, 60);
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
-    
     
     //franka::GripperState gripper_state = gripper.readOnce();
 

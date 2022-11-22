@@ -13,4 +13,5 @@ struct state
    double width;
    double max_width;
    boolean is_grasped;
+   boolean loop_closed;
 }
