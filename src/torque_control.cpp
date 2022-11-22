@@ -18,15 +18,14 @@
 #include "exlcm/command.hpp"
 #include "exlcm/state.hpp"
 
-
-// compile with: g++ -o torque_control torque_control.cpp -lfranka -lpthread -llcm
-
+// define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
 };
 
 command_received Command;
 
+// define message handler
 class Handler 
 {
     public:
@@ -47,13 +46,11 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  std::atomic_bool running{true};
   lcm::LCM lcm;
   exlcm::state msg_to_send;
 
   Handler handlerObject;
   lcm.subscribe("COMMAND", &Handler::handleMessage, &handlerObject);
-
 
 try {
     // Connect to robot.
@@ -99,18 +96,19 @@ try {
             msg_to_send.tau_J_d[i] = state.tau_J_d[i];
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
-        
-        //msg_to_send.width = gripper_state.width;
-        //msg_to_send.max_width = gripper_state.max_width;
-        //msg_to_send.is_grasped = gripper_state.is_grasped;
 
         lcm.publish("STATE", &msg_to_send);
-
         lcm.handle();
+        
         // The following line is only necessary for printing the rate limited torque. As we activated
         // rate limiting for the control loop (activated by default), the torque would anyway be
         // adjusted!
         std::array<double, 7> tau_d_rate_limited = franka::limitRate(franka::kMaxTorqueRate, Command.tau_received, state.tau_J_d);
+
+        // CHANGE TAU_J_D TO TAU_J and see if anything changes
+        //maybe the tau_d_rate_limited output is just the desired torque all the time (?)
+        // test what happens if zero torque is applied !!!
+        // test different impedance values !!!
 
     // Send torque command.
     return tau_d_rate_limited;
@@ -118,9 +116,13 @@ try {
 
 
     // Start real-time control loop.
+    robot.control(torque_control);
+    
+    // Start non-real-time control loop.
+    
     // gripper.grasp(0.02, 10.0, 60);
     // std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
-    robot.control(torque_control);
+    
     
     //franka::GripperState gripper_state = gripper.readOnce();
 
@@ -130,7 +132,6 @@ try {
     // std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
 
   } catch (const franka::Exception& ex) {
-    running = false;
     std::cerr << ex.what() << std::endl;
   }
   return 0;
