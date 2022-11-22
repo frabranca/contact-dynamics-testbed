@@ -34,9 +34,10 @@ class Handler
         void handleMessage(const lcm::ReceiveBuffer* rbuf,
                 const std::string& chan, 
                 const exlcm::gripper_command* msg_received){
-              gcm_struct.width = msg_received.width;
-              gcm_struct.speed = msg_received.speed;
-              gcm_struct.force = msg_received.force;
+              gcm_struct.width = msg_received->width;
+              gcm_struct.speed = msg_received->speed;
+              gcm_struct.force = msg_received->force;
+}
 };
 
 int main(int argc, char** argv) {

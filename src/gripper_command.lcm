@@ -1,6 +1,6 @@
 package exlcm;
 
-struct gripper_state
+struct gripper_command
 {
    double width;
    double speed;

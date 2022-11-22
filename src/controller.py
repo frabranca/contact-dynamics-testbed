@@ -27,7 +27,7 @@ class Controller:
         self.gripper_command_channel = gripper_command_channel
 
         self.lc = lcm.LCM()
-        self.subscription = self.lc.subscribe(self.channel_state, self.robot_handler)
+        self.subscription = self.lc.subscribe(self.robot_state_channel, self.robot_handler)
 
         # actions
         self.control_loop()
@@ -63,7 +63,7 @@ class Controller:
                 print("loop closed")
                 break
 
-            if round((start_time-time.time()), 2) == 5.0:
+            if round((time.time()-start_time), 3) == 10.0:
                 self.move_gripper()
             
             if self.save_output:

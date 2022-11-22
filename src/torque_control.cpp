@@ -87,7 +87,7 @@ try {
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
             
         time += period.toMSec();
-        if (time >= 10000) {
+        if (time >= 20000) {
             std::cout << std::endl << "Finished test" << std::endl;
             msg_to_send.loop_closed = true;
             lcm.publish("ROBOT STATE", &msg_to_send);
