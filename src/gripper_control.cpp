@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
 
   lcm::LCM lcm;
   franka::Gripper gripper(argv[1]);
+  gripper.homing();
 
   Handler handlerObject;
   lcm.subscribe("GRIPPER COMMAND", &Handler::handleMessage, &handlerObject);
