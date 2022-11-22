@@ -21,9 +21,7 @@
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
-    double gripper_width;
-    double gripper_speed;
-    double gripper_force;
+    std::array<double, 3> gripper_received;
 };
 
 command_received Command;
@@ -37,9 +35,13 @@ class Handler
                 const std::string& chan, 
                 const exlcm::command* msg_received){
               int i;
-              for (i=0; i<7; i++)
-                Command.tau_received[i] = msg_received->tau_J_d[i];
-                }
+              for (i=0; i<7; i++){
+                Command.tau_received[i] = msg_received->tau_J_d[i];}
+              for (i=0; i<3; i++){
+                Command.gripper_received[i] = msg_received->gripper[i];}
+              }
+              
+
 };
 
 int main(int argc, char** argv) {
@@ -52,6 +54,9 @@ int main(int argc, char** argv) {
   lcm::LCM lcm;
   exlcm::state msg_to_send;
   uint64_t time = 0;
+  franka::Gripper gripper(argv[1]);
+  gripper.homing();
+  
 
   Handler handlerObject;
   lcm.subscribe("COMMAND", &Handler::handleMessage, &handlerObject);
@@ -59,8 +64,8 @@ int main(int argc, char** argv) {
 try {
     // Connect to robot.
     franka::Robot robot(argv[1]);
-    franka::Gripper gripper(argv[1]);
     setDefaultBehavior(robot);
+    
 
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
@@ -130,9 +135,13 @@ try {
     robot.control(torque_control);
     
     // Start non-real-time control loop.
-    std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
+    //std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
+    
     lcm.handle();
-    gripper.grasp(Command.gripper_width, Command.gripper_speed, Command.gripper_force);
+    std::cout<< Command.gripper_received[0] << std::endl;
+    std::cout<< Command.gripper_received[1] << std::endl;
+    std::cout<< Command.gripper_received[2] << std::endl;
+    gripper.grasp(Command.gripper_received[0], Command.gripper_received[1], Command.gripper_received[2]);
     
     //franka::GripperState gripper_state = gripper.readOnce();
 

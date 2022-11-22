@@ -3,9 +3,7 @@ package exlcm;
 struct command
 { 
     double tau_J_d[7];
-    double gripper_width;
-    double gripper_speed;
-    double gripper_force;
+    double gripper[3];
 }
 
 

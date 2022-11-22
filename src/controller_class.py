@@ -30,7 +30,7 @@ class Controller:
 
         self.subscription = self.lc.subscribe(self.channel_state, self.my_handler)
         self.control_loop()
-        self.move_gripper()
+        #self.move_gripper()
         self.lc.unsubscribe(self.subscription)
 
         if save_output:
@@ -59,30 +59,34 @@ class Controller:
 
             # control logic
             cmd.tau_J_d = self.tau_J_d
+            cmd.gripper = (0.02,10.0,60.0)
             self.lc.publish(self.channel_command, cmd.encode())
+
+            if self.loop_closed:
+                print("loop closed")
+                break
             
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
                 self.time_save.append(time.time() - start_time)
-            if self.loop_closed:
-                break
+            
             # if (time.time() - start_time)>10.:
             #     break
     
     def move_gripper(self):
-        self.lc.handle()
+        #self.lc.handle()
         cmd = command()
-        cmd.gripper_width = 0.02
-        cmd.gripper_speed = 10.0
-        cmd.gripper_force = 60
+        cmd.gripper = (0.02,10.0,60.0)
         self.lc.publish(self.channel_command, cmd.encode())
+        print("gripper command sent")
     
     
     def write_output(self):
         output = open("output", "w")
+        output.truncate()
         for i in range(len(self.tau_J_save)):
             output.write(str(self.time_save[i]) + ' ' + ' '.join(map(str, self.tau_J_save[i])) + '\n')
         output.close()
         
 if __name__ == "__main__":
-    controller = Controller("STATE", "COMMAND", save_output=True)    
+    controller = Controller("STATE", "COMMAND", save_output=False)    
