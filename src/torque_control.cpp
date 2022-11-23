@@ -14,12 +14,13 @@
 
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
-#include "exlcm/robot_command.hpp"
-#include "exlcm/robot_state.hpp"
+#include "frankalcm/robot_command.hpp"
+#include "frankalcm/robot_state.hpp"
 
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
+    bool loop_closed_received;
 };
 
 command_received rcm_struct;
@@ -31,8 +32,9 @@ class Handler
         ~Handler() {}
         void handleMessage(const lcm::ReceiveBuffer* rbuf,
                 const std::string& chan, 
-                const exlcm::robot_command* msg_received){
+                const frankalcm::robot_command* msg_received){
               int i;
+              rcm_struct.loop_closed_received = msg_received.loop_closed
               for (i=0; i<7; i++){
                 rcm_struct.tau_received[i] = msg_received->tau_J_d[i];}
               }
@@ -46,7 +48,7 @@ int main(int argc, char** argv) {
   }
 
   lcm::LCM lcm;
-  exlcm::robot_state msg_to_send;
+  frankalcm::robot_state msg_to_send;
   uint64_t time = 0;  
 
   Handler handlerObject;
@@ -87,11 +89,6 @@ try {
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
             
         time += period.toMSec();
-        if (time >= 20000) {
-            std::cout << std::endl << "Finished test" << std::endl;
-            msg_to_send.loop_closed = true;
-            lcm.publish("ROBOT STATE", &msg_to_send);
-            return franka::MotionFinished(zero_torques);}
 
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
@@ -106,6 +103,10 @@ try {
 
         lcm.publish("ROBOT STATE", &msg_to_send);
         lcm.handle();
+
+        if (rcm_struct.loop_closed == true) {
+            std::cout << std::endl << "Finished test" << std::endl;
+            return franka::MotionFinished(zero_torques);}
         
         // The following line is only necessary for printing the rate limited torque. As we activated
         // rate limiting for the control loop (activated by default), the torque would anyway be

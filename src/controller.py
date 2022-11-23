@@ -1,5 +1,5 @@
 import lcm
-from exlcm import robot_state, robot_command, gripper_command
+from frankalcm import robot_state, robot_command, gripper_command
 import time
 import numpy as np
 
@@ -14,7 +14,6 @@ class Controller:
         self.tau_J = 0
         self.tau_J_d = 0
         self.dtau_J = 0
-        self.loop_closed = False
 
         # lists to save output
         self.save_output = save_output
@@ -47,11 +46,12 @@ class Controller:
         self.tau_J       = rst.tau_J
         self.tau_J_d     = rst.tau_J_d
         self.dtau_J      = rst.dtau_J
-        self.loop_closed = rst.loop_closed        
 
     def control_loop(self):
         start_time = time.time()
-        while True:
+        gripper_moved = False
+        loop_closed = False
+        while not loop_closed:
             self.lc.handle()
             rcm = robot_command()
 
@@ -59,12 +59,13 @@ class Controller:
             rcm.tau_J_d = self.tau_J_d
             self.lc.publish(self.robot_command_channel, rcm.encode())
 
-            if self.loop_closed:
-                print("loop closed")
-                break
-
-            if round((time.time()-start_time), 3) == 10.0:
+            if (time.time()-start_time) > 10.0 and gripper_moved == False:
+                gripper_moved = True
                 self.move_gripper()
+            
+            if (time.time()-start_time) > 20.:
+                rcm.loop_closed = True
+                loop_closed = True
             
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)

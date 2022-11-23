@@ -15,7 +15,7 @@
 
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
-#include "exlcm/gripper_command.hpp"
+#include "frankalcm/gripper_command.hpp"
 
 // define struct to store received commands from controller
 struct command_received{
@@ -33,7 +33,7 @@ class Handler
         ~Handler() {}
         void handleMessage(const lcm::ReceiveBuffer* rbuf,
                 const std::string& chan, 
-                const exlcm::gripper_command* msg_received){
+                const frankalcm::gripper_command* msg_received){
               gcm_struct.width = msg_received->width;
               gcm_struct.speed = msg_received->speed;
               gcm_struct.force = msg_received->force;
