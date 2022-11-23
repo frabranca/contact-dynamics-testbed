@@ -13,18 +13,18 @@ cd build
 cmake ..
 make
 ```
-After installing LCM (https://lcm-proj.github.io/), the bindings are generated using the following commands:
+After installing LCM (https://lcm-proj.github.io/), the bindings are generated using the following command:
 ```
-lcm-gen -xp gripper_command.lcm
-lcm-gen -xp robot_command.lcm
-lcm-gen -xp robot_state.lcm
+chmod 755 build-lcm.sh
+ls -l build-lcm.sh
+./build-lcm.sh
 ```
 
-Initiate the LCM communication between the files `#controller_class.py` and `#torque_control.cpp` by running the following commands in this specific order:
+Initiate the LCM communication between the files `#controller_class.py` and `#torque_control.cpp` by running the following command:
 
 ```
-python3 controller.py
-sudo ./torque_control <fci-address>
-sudo ./gripper_control <fci-address>
+chmod 755 build-lcm.sh
+ls -l build-lcm.sh
+./driver.sh
 ```
 
