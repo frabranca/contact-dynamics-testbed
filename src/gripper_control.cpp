@@ -55,9 +55,11 @@ int main(int argc, char** argv) {
   lcm.subscribe("GRIPPER COMMAND", &Handler::handleMessage, &handlerObject);
 
   try {
-  lcm.handle();
-  gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
-
+    if (gcm_struct.width > 0.0){
+      lcm.handle();
+      gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
+    }
+  
   } catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;
         return -1;
