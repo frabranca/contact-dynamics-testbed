@@ -70,6 +70,7 @@ class Controller:
             if (time.time()-start_time) > 20.:
                 rcm.loop_closed = True
                 self.lc.publish(self.robot_command_channel, rcm.encode())
+                print("LOOP CLOSED")
                 loop_closed = True
             
             # if (time.time() - start_time)>10.:

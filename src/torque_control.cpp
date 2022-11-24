@@ -34,7 +34,7 @@ class Handler
                 const std::string& chan, 
                 const frankalcm::robot_command* msg_received){
               int i;
-              rcm_struct.loop_closed_received = msg_received.loop_closed
+              rcm_struct.loop_closed_received = msg_received->loop_closed;
               for (i=0; i<7; i++){
                 rcm_struct.tau_received[i] = msg_received->tau_J_d[i];}
               }
@@ -104,7 +104,7 @@ try {
         lcm.publish("ROBOT STATE", &msg_to_send);
         lcm.handle();
 
-        if (rcm_struct.loop_closed == true) {
+        if (rcm_struct.loop_closed_received == true) {
             std::cout << std::endl << "Finished test" << std::endl;
             return franka::MotionFinished(zero_torques);}
         
