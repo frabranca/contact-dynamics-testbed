@@ -1,11 +1,5 @@
-#include <array>
-#include <atomic>
 #include <cmath>
-#include <functional>
 #include <iostream>
-#include <iterator>
-#include <mutex>
-#include <thread>
 
 #include <franka/duration.h>
 #include <franka/exception.h>
@@ -15,7 +9,8 @@
 
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
-#include "frankalcm/gripper_command.hpp"
+#include "robot_messages/frankalcm/gripper_command.hpp"
+#include "robot_messages/frankalcm/gripper_state.hpp"
 
 // define struct to store received commands from controller
 struct command_received{
@@ -48,6 +43,7 @@ int main(int argc, char** argv) {
   }
 
   lcm::LCM lcm;
+  frankalcm::gripper_state msg_to_send;
   franka::Gripper gripper(argv[1]);
   gripper.homing();
 
@@ -55,11 +51,18 @@ int main(int argc, char** argv) {
   lcm.subscribe("GRIPPER COMMAND", &Handler::handleMessage, &handlerObject);
 
   try {
-    if (gcm_struct.width > 0.0){
-      lcm.handle();
-      gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
+    // if gripper is fully open send message to controller to say that homing is complete
+    franka::GripperState gripper_state = gripper.readOnce();
+    if (gripper_state.width == gripper_state.max_width){
+      msg_to_send.homing_done = true
     }
-  
+    lcm.publish("GRIPPER STATE", &msg_to_send)
+
+    // wait for message to use gripper
+    lcm.handle();
+    gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
+
+
   } catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;
         return -1;

@@ -1,11 +1,5 @@
-#include <array>
-#include <atomic>
 #include <cmath>
-#include <functional>
 #include <iostream>
-#include <iterator>
-#include <mutex>
-#include <thread>
 
 #include <franka/duration.h>
 #include <franka/exception.h>
@@ -14,8 +8,8 @@
 
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
-#include "frankalcm/robot_command.hpp"
-#include "frankalcm/robot_state.hpp"
+#include "robot_messages/frankalcm/robot_command.hpp"
+#include "robot_messages/frankalcm/robot_state.hpp"
 
 // define struct to store received commands from controller
 struct command_received{
@@ -49,7 +43,6 @@ int main(int argc, char** argv) {
 
   lcm::LCM lcm;
   frankalcm::robot_state msg_to_send;
-  uint64_t time = 0;  
 
   Handler handlerObject;
   lcm.subscribe("ROBOT COMMAND", &Handler::handleMessage, &handlerObject);
@@ -64,8 +57,7 @@ try {
     MotionGenerator motion_generator(0.5, q_goal);
     std::cout << "WARNING: This example will move the robot! "
               << "Please make sure to have the user stop button at hand!" << std::endl;
-             // << "Press Enter to continue..." << std::endl;
-    //std::cin.ignore();
+
     robot.control(motion_generator);
     std::cout << "Finished moving to initial joint configuration." << std::endl;
     
@@ -80,16 +72,17 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, 
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
-        
+
     // Define callback for the joint torque control loop.
     franka::Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+
+    msg_to_send.init_position = true;
+    lcm.publish("ROBOT STATE", &msg_to_send);
 
     std::function<franka::Torques(const franka::RobotState&, franka::Duration period)>
         torque_control =
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
             
-        time += period.toMSec();
-
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
             msg_to_send.q_d[i] = state.q_d[i];
