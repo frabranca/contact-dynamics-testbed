@@ -65,6 +65,7 @@ class Controller:
         gripper_moved = False
         loop_closed = False
         while not loop_closed:
+            print(time.time()-start_time)
             self.lc.handle()
             rcm = robot_command()
 
