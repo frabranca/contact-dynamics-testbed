@@ -59,17 +59,18 @@ class Controller:
             rcm.tau_J_d = self.tau_J_d
             self.lc.publish(self.robot_command_channel, rcm.encode())
 
+            if self.save_output:
+                self.tau_J_save.append(self.tau_J)
+                self.time_save.append(time.time() - start_time)
+
             if (time.time()-start_time) > 10.0 and gripper_moved == False:
                 gripper_moved = True
                 self.move_gripper()
             
             if (time.time()-start_time) > 20.:
                 rcm.loop_closed = True
+                self.lc.publish(self.robot_command_channel, rcm.encode())
                 loop_closed = True
-            
-            if self.save_output:
-                self.tau_J_save.append(self.tau_J)
-                self.time_save.append(time.time() - start_time)
             
             # if (time.time() - start_time)>10.:
             #     break
