@@ -20,10 +20,10 @@ ls -l build-lcm.sh
 ./build-lcm.sh
 ```
 
-Initiate the LCM communication between the files `controller_class.py` and `torque_control.cpp` by running the following command:
+Initiate the LCM communication between the files `controller.py`, `torque_control.cpp` and `gripper_control.cpp` by running the following command:
 
 ```
-chmod 755 build-lcm.sh
+chmod 755 driver.sh
 ls -l driver.sh
 ./driver.sh
 ```
