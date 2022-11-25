@@ -1,7 +1,0 @@
-package frankalcm;
-
-struct gripper_state
-{
-   boolean homing_done;
-   double width;
-}

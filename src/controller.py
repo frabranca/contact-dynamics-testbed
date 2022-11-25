@@ -39,15 +39,6 @@ class Controller:
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
 
         # actions
-        #self.lc.handle()
-        #if self.homing_done:
-
-        self.rcm.start_robot = True
-        #self.gcm_start_gripper = True
-        
-        self.lc.publish(self.rcm_channel, self.rcm.encode())
-        self.lc.publish(self.gcm_channel, self.gcm.encode())
-        
         self.control_loop()
         
         self.lc.unsubscribe(self.robot_sub)
@@ -80,7 +71,6 @@ class Controller:
         loop_closed = False
         self.message("loop started")
         while not loop_closed:
-            #print(time.time()-start_time)
             self.lc.handle()
 
             # control logic

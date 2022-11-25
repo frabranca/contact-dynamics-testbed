@@ -17,7 +17,6 @@ struct command_received{
     double width;
     double speed;
     double force;
-    bool start_gripper;
 };
 
 command_received gcm_struct;
@@ -33,9 +32,12 @@ class Handler
               gcm_struct.width = msg_received->width;
               gcm_struct.speed = msg_received->speed;
               gcm_struct.force = msg_received->force;
-              gcm_struct.start_gripper = msg_received->start_gripper;
 }
 };
+
+void message(const char* input){
+  std::cout << "gripper_control.cpp" << input << std::endl;
+}
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
@@ -55,9 +57,7 @@ int main(int argc, char** argv) {
     franka::Gripper gripper(argv[1]);
     franka::GripperState gripper_state = gripper.readOnce();
     gripper.homing();
-    //msg_to_send.homing_done = true;
-    //lcm.publish("GRIPPER STATE", &msg_to_send);
-    std::cout<< "homing done" << std::endl;
+    message("homing done");
 
     // wait for message to use gripper
     lcm.handle();

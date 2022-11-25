@@ -10,16 +10,15 @@ except ImportError:
 import struct
 
 class robot_command(object):
-    __slots__ = ["tau_J_d", "loop_closed", "start_robot"]
+    __slots__ = ["tau_J_d", "loop_closed"]
 
-    __typenames__ = ["double", "boolean", "boolean"]
+    __typenames__ = ["double", "boolean"]
 
-    __dimensions__ = [[7], None, None]
+    __dimensions__ = [[7], None]
 
     def __init__(self):
         self.tau_J_d = [ 0.0 for dim0 in range(7) ]
         self.loop_closed = False
-        self.start_robot = False
 
     def encode(self):
         buf = BytesIO()
@@ -29,7 +28,7 @@ class robot_command(object):
 
     def _encode_one(self, buf):
         buf.write(struct.pack('>7d', *self.tau_J_d[:7]))
-        buf.write(struct.pack(">bb", self.loop_closed, self.start_robot))
+        buf.write(struct.pack(">b", self.loop_closed))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -45,14 +44,13 @@ class robot_command(object):
         self = robot_command()
         self.tau_J_d = struct.unpack('>7d', buf.read(56))
         self.loop_closed = bool(struct.unpack('b', buf.read(1))[0])
-        self.start_robot = bool(struct.unpack('b', buf.read(1))[0])
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if robot_command in parents: return 0
-        tmphash = (0xa33439c4e71c4b8b) & 0xffffffffffffffff
+        tmphash = (0x8ac804e7a94a1f14) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

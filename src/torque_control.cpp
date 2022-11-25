@@ -15,7 +15,6 @@
 struct command_received{
     std::array<double, 7> tau_received;
     bool loop_closed_received;
-    bool start_robot_received;
 };
 
 command_received rcm_struct;
@@ -30,11 +29,14 @@ class Handler
                 const frankalcm::robot_command* msg_received){
               int i;
               rcm_struct.loop_closed_received = msg_received->loop_closed;
-              rcm_struct.start_robot_received = msg_received->start_robot;
               for (i=0; i<7; i++){
                 rcm_struct.tau_received[i] = msg_received->tau_J_d[i];}
               }
 };
+
+void message(const char* input){
+  std::cout << "torque_control.cpp" << input << std::endl;
+}
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
@@ -57,11 +59,9 @@ try {
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     MotionGenerator motion_generator(0.5, q_goal);
-    std::cout << "WARNING: This example will move the robot! "
-              << "Please make sure to have the user stop button at hand!" << std::endl;
 
     robot.control(motion_generator);
-    std::cout << "Finished moving to initial joint configuration." << std::endl;
+    message("Finished moving to initial joint configuration.");
     
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
@@ -97,7 +97,7 @@ try {
         lcm.handle();
 
         if (rcm_struct.loop_closed_received == true) {
-            std::cout << std::endl << "Finished test" << std::endl;
+            message("Loop closed");
             return franka::MotionFinished(zero_torques);}
         
         // The following line is only necessary for printing the rate limited torque. As we activated
@@ -110,10 +110,7 @@ try {
     };
 
     // Start real-time control loop.
-    //lcm.handle();
-    //if (rcm_struct.start_robot_received){
-      robot.control(torque_control);
-    //}
+    robot.control(torque_control);
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;
