@@ -26,7 +26,6 @@ int main(int argc, char** argv) {
 
     gripper.homing();
     std::cout<< "homing done" << std::endl;
-    
 
     // wait for message to use gripper
     gripper.grasp(0.02,10.,60.);

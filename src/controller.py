@@ -17,6 +17,9 @@ class Controller:
         self.homing_done = 0
         self.init_position = 0
 
+        # useful booleans
+        self.gripper_moved = False
+
         # lists to save output
         self.save_output = save_output
         self.tau_J_save = []
@@ -35,7 +38,7 @@ class Controller:
 
         # actions
         self.lc.handle()
-        if self.homing_done and self.init_position:
+        if self.homing_done:
             self.control_loop()
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
@@ -59,10 +62,12 @@ class Controller:
         gst = gripper_state.decode(data)
         self.homing_done = gst.homing_done
         self.width       = gst.width 
+    
+    def message(self, string):
+        print("controller.py:" + string)
 
     def control_loop(self):
         start_time = time.time()
-        gripper_moved = False
         loop_closed = False
         while not loop_closed:
             print(time.time()-start_time)
@@ -77,23 +82,23 @@ class Controller:
                 self.tau_J_save.append(self.tau_J)
                 self.time_save.append(time.time() - start_time)
 
-            if (time.time()-start_time) > 10.0 and gripper_moved == False:
-                gripper_moved = True
-                self.move_gripper()
+            if (time.time()-start_time) > 10.0 and self.gripper_moved == False:
+                self.gripper_moved = True
+                self.move_gripper(0.02, 10.0, 60.0)
             
             if (time.time()-start_time) > 20.:
                 rcm.loop_closed = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
-                print("LOOP CLOSED")
+                self.message("loop closed")
                 loop_closed = True
     
-    def move_gripper(self):
+    def move_gripper(self, width, speed, force):
         gcm = gripper_command()
-        gcm.width = 0.02 
-        gcm.speed = 10.0 
-        gcm.force = 60.0
+        gcm.width = width
+        gcm.speed = speed
+        gcm.force = force
         self.lc.publish(self.gcm_channel, gcm.encode())
-        print("gripper command sent")
+        self.message("gripper command sent")
     
     def write_output(self):
         output = open("output", "w")
