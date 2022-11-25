@@ -60,7 +60,6 @@ class Controller:
     
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)
-        self.homing_done = gst.homing_done
         self.width       = gst.width 
     
     def message(self, string):
