@@ -14,8 +14,6 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.width = 0
-        self.homing_done = 0
-        self.init_position = 0
 
         # useful booleans
         self.gripper_moved = False
@@ -31,6 +29,10 @@ class Controller:
         self.gcm_channel = gcm_channel
         self.gst_channel = gst_channel
 
+        # start command functions
+        self.rcm = robot_command()
+        self.gcm = gripper_command()
+
         # subscribe to channels
         self.lc = lcm.LCM()
         self.robot_sub = self.lc.subscribe(self.rst_channel, self.robot_handler)
@@ -39,7 +41,15 @@ class Controller:
         # actions
         #self.lc.handle()
         #if self.homing_done:
+
+        self.rcm.start_robot = True
+        self.gcm_start_gripper = True
+        
+        self.lc.publish(self.rcm_channel, self.rcm.encode())
+        self.lc.publish(self.gcm_channel, self.gcm.encode())
+        
         self.control_loop()
+        
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
 
@@ -73,11 +83,10 @@ class Controller:
         while not loop_closed:
             #print(time.time()-start_time)
             self.lc.handle()
-            rcm = robot_command()
 
             # control logic
-            rcm.tau_J_d = self.tau_J_d
-            self.lc.publish(self.rcm_channel, rcm.encode())
+            self.rcm.tau_J_d = self.tau_J_d
+            self.lc.publish(self.rcm_channel, self.rcm.encode())
 
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
@@ -87,18 +96,17 @@ class Controller:
                 self.gripper_moved = True
                 self.move_gripper(0.02, 10.0, 60.0)
             
-            if (time.time()-start_time) > 20.:
-                rcm.loop_closed = True
-                self.lc.publish(self.rcm_channel, rcm.encode())
+            if (time.time()-start_time) > 20.0:
+                self.rcm.loop_closed = True
+                self.lc.publish(self.rcm_channel, self.rcm.encode())
                 self.message("loop closed")
                 loop_closed = True
     
     def move_gripper(self, width, speed, force):
-        gcm = gripper_command()
-        gcm.width = width
-        gcm.speed = speed
-        gcm.force = force
-        self.lc.publish(self.gcm_channel, gcm.encode())
+        self.gcm.width = width
+        self.gcm.speed = speed
+        self.gcm.force = force
+        self.lc.publish(self.gcm_channel, self.gcm.encode())
         self.message("gripper command sent")
     
     def write_output(self):

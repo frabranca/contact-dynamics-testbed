@@ -20,6 +20,8 @@ class robot_command
 
         int8_t     loop_closed;
 
+        int8_t     start_robot;
+
     public:
         /**
          * Encode a message into binary form.
@@ -122,6 +124,9 @@ int robot_command::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->loop_closed, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->start_robot, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -135,6 +140,9 @@ int robot_command::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->loop_closed, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->start_robot, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -143,12 +151,13 @@ int robot_command::_getEncodedSizeNoHash() const
     int enc_size = 0;
     enc_size += __double_encoded_array_size(NULL, 7);
     enc_size += __boolean_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t robot_command::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x8ac804e7a94a1f14LL;
+    uint64_t hash = 0xa33439c4e71c4b8bLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

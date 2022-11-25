@@ -16,8 +16,6 @@ namespace frankalcm
 class gripper_state
 {
     public:
-        int8_t     homing_done;
-
         double     width;
 
     public:
@@ -116,9 +114,6 @@ int gripper_state::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->homing_done, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
@@ -129,9 +124,6 @@ int gripper_state::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->homing_done, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
@@ -141,14 +133,13 @@ int gripper_state::_decodeNoHash(const void *buf, int offset, int maxlen)
 int gripper_state::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += __boolean_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t gripper_state::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x2725ba7f6de5e6e0LL;
+    uint64_t hash = 0x4cab859bcaca965eLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

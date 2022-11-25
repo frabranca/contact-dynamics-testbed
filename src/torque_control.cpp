@@ -15,6 +15,7 @@
 struct command_received{
     std::array<double, 7> tau_received;
     bool loop_closed_received;
+    bool start_robot_received;
 };
 
 command_received rcm_struct;
@@ -29,6 +30,7 @@ class Handler
                 const frankalcm::robot_command* msg_received){
               int i;
               rcm_struct.loop_closed_received = msg_received->loop_closed;
+              rcm_struct.start_robot = msg_received->start_robot;
               for (i=0; i<7; i++){
                 rcm_struct.tau_received[i] = msg_received->tau_J_d[i];}
               }
@@ -76,9 +78,6 @@ try {
     // Define callback for the joint torque control loop.
     franka::Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
 
-    msg_to_send.init_position = true;
-    lcm.publish("ROBOT STATE", &msg_to_send);
-
     std::function<franka::Torques(const franka::RobotState&, franka::Duration period)>
         torque_control =
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
@@ -111,7 +110,10 @@ try {
     };
 
     // Start real-time control loop.
-    robot.control(torque_control);
+    lcm.handle();
+    if (rcm_struct.start_robot_received){
+      robot.control(torque_control);
+    }
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;

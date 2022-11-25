@@ -22,6 +22,8 @@ class gripper_command
 
         double     force;
 
+        int8_t     start_gripper;
+
     public:
         /**
          * Encode a message into binary form.
@@ -127,6 +129,9 @@ int gripper_command::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->force, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->start_gripper, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -143,6 +148,9 @@ int gripper_command::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->force, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->start_gripper, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -152,12 +160,13 @@ int gripper_command::_getEncodedSizeNoHash() const
     enc_size += __double_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t gripper_command::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xf0d6ebefec5902aeLL;
+    uint64_t hash = 0xdd0dd4fe3fc5847dLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

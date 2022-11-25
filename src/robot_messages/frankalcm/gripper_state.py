@@ -10,14 +10,13 @@ except ImportError:
 import struct
 
 class gripper_state(object):
-    __slots__ = ["homing_done", "width"]
+    __slots__ = ["width"]
 
-    __typenames__ = ["boolean", "double"]
+    __typenames__ = ["double"]
 
-    __dimensions__ = [None, None]
+    __dimensions__ = [None]
 
     def __init__(self):
-        self.homing_done = False
         self.width = 0.0
 
     def encode(self):
@@ -27,7 +26,7 @@ class gripper_state(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">bd", self.homing_done, self.width))
+        buf.write(struct.pack(">d", self.width))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -41,14 +40,14 @@ class gripper_state(object):
 
     def _decode_one(buf):
         self = gripper_state()
-        self.homing_done = bool(struct.unpack('b', buf.read(1))[0])
         self.width = struct.unpack(">d", buf.read(8))[0]
         return self
     _decode_one = staticmethod(_decode_one)
 
+    _hash = None
     def _get_hash_recursive(parents):
         if gripper_state in parents: return 0
-        tmphash = (0x2725ba7f6de5e6e0) & 0xffffffffffffffff
+        tmphash = (0x4cab859bcaca965e) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
@@ -59,8 +58,4 @@ class gripper_state(object):
             gripper_state._packed_fingerprint = struct.pack(">Q", gripper_state._get_hash_recursive([]))
         return gripper_state._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
-
-    def get_hash(self):
-        """Get the LCM hash of the struct"""
-        return struct.unpack(">Q", gripper_state._get_packed_fingerprint())[0]
 

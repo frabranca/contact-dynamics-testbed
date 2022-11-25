@@ -32,8 +32,6 @@ class robot_state
 
         double     dtau_J[7];
 
-        int8_t     init_position;
-
     public:
         /**
          * Encode a message into binary form.
@@ -154,9 +152,6 @@ int robot_state::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->dtau_J[0], 7);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->init_position, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     return pos;
 }
 
@@ -188,9 +183,6 @@ int robot_state::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->dtau_J[0], 7);
     if(tlen < 0) return tlen; else pos += tlen;
 
-    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->init_position, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     return pos;
 }
 
@@ -205,13 +197,12 @@ int robot_state::_getEncodedSizeNoHash() const
     enc_size += __double_encoded_array_size(NULL, 7);
     enc_size += __double_encoded_array_size(NULL, 7);
     enc_size += __double_encoded_array_size(NULL, 7);
-    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t robot_state::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x23c74f20868c9c9eLL;
+    uint64_t hash = 0xc1375c5387509a59LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

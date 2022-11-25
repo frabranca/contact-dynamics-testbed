@@ -10,11 +10,11 @@ except ImportError:
 import struct
 
 class robot_state(object):
-    __slots__ = ["q", "q_d", "dq", "dq_d", "ddq_d", "tau_J", "tau_J_d", "dtau_J", "init_position"]
+    __slots__ = ["q", "q_d", "dq", "dq_d", "ddq_d", "tau_J", "tau_J_d", "dtau_J"]
 
-    __typenames__ = ["double", "double", "double", "double", "double", "double", "double", "double", "boolean"]
+    __typenames__ = ["double", "double", "double", "double", "double", "double", "double", "double"]
 
-    __dimensions__ = [[7], [7], [7], [7], [7], [7], [7], [7], None]
+    __dimensions__ = [[7], [7], [7], [7], [7], [7], [7], [7]]
 
     def __init__(self):
         self.q = [ 0.0 for dim0 in range(7) ]
@@ -25,7 +25,6 @@ class robot_state(object):
         self.tau_J = [ 0.0 for dim0 in range(7) ]
         self.tau_J_d = [ 0.0 for dim0 in range(7) ]
         self.dtau_J = [ 0.0 for dim0 in range(7) ]
-        self.init_position = False
 
     def encode(self):
         buf = BytesIO()
@@ -42,7 +41,6 @@ class robot_state(object):
         buf.write(struct.pack('>7d', *self.tau_J[:7]))
         buf.write(struct.pack('>7d', *self.tau_J_d[:7]))
         buf.write(struct.pack('>7d', *self.dtau_J[:7]))
-        buf.write(struct.pack(">b", self.init_position))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -64,13 +62,13 @@ class robot_state(object):
         self.tau_J = struct.unpack('>7d', buf.read(56))
         self.tau_J_d = struct.unpack('>7d', buf.read(56))
         self.dtau_J = struct.unpack('>7d', buf.read(56))
-        self.init_position = bool(struct.unpack('b', buf.read(1))[0])
         return self
     _decode_one = staticmethod(_decode_one)
 
+    _hash = None
     def _get_hash_recursive(parents):
         if robot_state in parents: return 0
-        tmphash = (0x23c74f20868c9c9e) & 0xffffffffffffffff
+        tmphash = (0xc1375c5387509a59) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
@@ -81,8 +79,4 @@ class robot_state(object):
             robot_state._packed_fingerprint = struct.pack(">Q", robot_state._get_hash_recursive([]))
         return robot_state._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
-
-    def get_hash(self):
-        """Get the LCM hash of the struct"""
-        return struct.unpack(">Q", robot_state._get_packed_fingerprint())[0]
 

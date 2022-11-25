@@ -17,6 +17,7 @@ struct command_received{
     double width;
     double speed;
     double force;
+    bool start_gripper;
 };
 
 command_received gcm_struct;
@@ -32,6 +33,7 @@ class Handler
               gcm_struct.width = msg_received->width;
               gcm_struct.speed = msg_received->speed;
               gcm_struct.force = msg_received->force;
+              gcm_struct.start_gripper = msg_received->start_gripper;
 }
 };
 
@@ -59,8 +61,11 @@ int main(int argc, char** argv) {
 
     // wait for message to use gripper
     lcm.handle();
-    gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
-
+    if (gcm_struct.start_gripper){
+      lcm.handle()
+      gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
+    }
+    
   } catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;
         return -1;

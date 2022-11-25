@@ -5,4 +5,5 @@ struct gripper_command
    double width;
    double speed;
    double force;
+   boolean start_gripper;
 }
