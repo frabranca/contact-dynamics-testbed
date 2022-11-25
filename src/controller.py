@@ -37,9 +37,9 @@ class Controller:
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
 
         # actions
-        self.lc.handle()
-        if self.homing_done:
-            self.control_loop()
+        #self.lc.handle()
+        #if self.homing_done:
+        self.control_loop()
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
 

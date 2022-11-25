@@ -52,12 +52,10 @@ int main(int argc, char** argv) {
     // if gripper is fully open send message to controller to say that homing is complete
     franka::Gripper gripper(argv[1]);
     franka::GripperState gripper_state = gripper.readOnce();
-    if (gripper_state.width != gripper_state.max_width){
-      gripper.homing()
-      msg_to_send.homing_done = true;
-      lcm.publish("GRIPPER STATE", &msg_to_send);
-      std::cout<< "homing done" << std::endl;
-    }
+    gripper.homing()
+    //msg_to_send.homing_done = true;
+    //lcm.publish("GRIPPER STATE", &msg_to_send);
+    std::cout<< "homing done" << std::endl;
 
     // wait for message to use gripper
     lcm.handle();
