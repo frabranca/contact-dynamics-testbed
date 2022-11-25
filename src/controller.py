@@ -43,7 +43,7 @@ class Controller:
         #if self.homing_done:
 
         self.rcm.start_robot = True
-        self.gcm_start_gripper = True
+        #self.gcm_start_gripper = True
         
         self.lc.publish(self.rcm_channel, self.rcm.encode())
         self.lc.publish(self.gcm_channel, self.gcm.encode())
@@ -66,7 +66,6 @@ class Controller:
         self.tau_J         = rst.tau_J
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
-        self.init_position = rst.init_position
     
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)

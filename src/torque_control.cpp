@@ -30,7 +30,7 @@ class Handler
                 const frankalcm::robot_command* msg_received){
               int i;
               rcm_struct.loop_closed_received = msg_received->loop_closed;
-              rcm_struct.start_robot = msg_received->start_robot;
+              rcm_struct.start_robot_received = msg_received->start_robot;
               for (i=0; i<7; i++){
                 rcm_struct.tau_received[i] = msg_received->tau_J_d[i];}
               }
@@ -110,10 +110,10 @@ try {
     };
 
     // Start real-time control loop.
-    lcm.handle();
-    if (rcm_struct.start_robot_received){
+    //lcm.handle();
+    //if (rcm_struct.start_robot_received){
       robot.control(torque_control);
-    }
+    //}
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;
