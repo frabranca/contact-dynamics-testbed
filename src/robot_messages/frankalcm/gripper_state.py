@@ -46,7 +46,6 @@ class gripper_state(object):
         return self
     _decode_one = staticmethod(_decode_one)
 
-    _hash = None
     def _get_hash_recursive(parents):
         if gripper_state in parents: return 0
         tmphash = (0x2725ba7f6de5e6e0) & 0xffffffffffffffff
@@ -60,4 +59,8 @@ class gripper_state(object):
             gripper_state._packed_fingerprint = struct.pack(">Q", gripper_state._get_hash_recursive([]))
         return gripper_state._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", gripper_state._get_packed_fingerprint())[0]
 

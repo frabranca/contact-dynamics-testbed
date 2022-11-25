@@ -46,7 +46,7 @@ class Controller:
         if save_output:
             self.write_output()
 
-    def robot_handler(self, data):
+    def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
         self.q             = rst.q
         self.q_d           = rst.q_d
@@ -58,19 +58,20 @@ class Controller:
         self.dtau_J        = rst.dtau_J
         self.init_position = rst.init_position
     
-    def gripper_handler(self, data):
+    def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)
         self.homing_done = gst.homing_done
         self.width       = gst.width 
     
     def message(self, string):
-        print("controller.py:" + string)
+        print("controller.py: " + string)
 
     def control_loop(self):
         start_time = time.time()
         loop_closed = False
+        self.message("loop started")
         while not loop_closed:
-            print(time.time()-start_time)
+            #print(time.time()-start_time)
             self.lc.handle()
             rcm = robot_command()
 

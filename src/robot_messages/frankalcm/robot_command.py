@@ -47,7 +47,6 @@ class robot_command(object):
         return self
     _decode_one = staticmethod(_decode_one)
 
-    _hash = None
     def _get_hash_recursive(parents):
         if robot_command in parents: return 0
         tmphash = (0x8ac804e7a94a1f14) & 0xffffffffffffffff
@@ -61,4 +60,8 @@ class robot_command(object):
             robot_command._packed_fingerprint = struct.pack(">Q", robot_command._get_hash_recursive([]))
         return robot_command._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", robot_command._get_packed_fingerprint())[0]
 
