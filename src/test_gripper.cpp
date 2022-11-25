@@ -24,20 +24,12 @@ int main(int argc, char** argv) {
     franka::Gripper gripper(argv[1]);
     franka::GripperState gripper_state = gripper.readOnce();
 
-    std::cout << gripper_state.width << std::endl;
-    std::cout << gripper_state.max_width << std::endl;
-
-    if (gripper_state.width != gripper_state.max_width){
-      gripper.homing()
-      msg_to_send.homing_done = true;
-      std::cout<< "homing done" << std::endl;
-    }
-    else {
-        std::cout << "gripper already in homing position" << std::endl;
-    }
+    gripper.homing();
+    std::cout<< "homing done" << std::endl;
+    
 
     // wait for message to use gripper
-    gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
+    gripper.grasp(0.02,10.,60.);
 
   } catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;
