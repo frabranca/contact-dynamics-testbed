@@ -108,4 +108,4 @@ class Controller:
         output.close()
         
 if __name__ == "__main__":
-    controller = Controller("ROBOT STATE", "ROBOT COMMAND", "GRIPPER STATE", "GRIPPER COMMAND", save_output=True)    
+    controller = Controller("ROBOT STATE", "ROBOT COMMAND", "GRIPPER STATE", "GRIPPER COMMAND")    
