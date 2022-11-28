@@ -18,6 +18,8 @@ class gripper_state
     public:
         double     width;
 
+        int8_t     gripper_enabled;
+
     public:
         /**
          * Encode a message into binary form.
@@ -117,6 +119,9 @@ int gripper_state::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->gripper_enabled, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -127,6 +132,9 @@ int gripper_state::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->gripper_enabled, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -134,12 +142,13 @@ int gripper_state::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t gripper_state::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x4cab859bcaca965eLL;
+    uint64_t hash = 0xd7aee79b314a76c9LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

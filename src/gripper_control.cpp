@@ -59,6 +59,9 @@ int main(int argc, char** argv) {
     gripper.homing();
     message("homing done");
 
+    msg_to_send.gripper_enabled = true;
+    lcm.publish("GRIPPER STATE", &msg_to_send);
+
     // wait for message to use gripper
     lcm.handle();
     std::cout << gcm_struct.width << ' ';
