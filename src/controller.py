@@ -14,6 +14,7 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.width = 0
+        self.robot_enabled = False
 
         # useful booleans
         self.gripper_moved = False
@@ -39,7 +40,9 @@ class Controller:
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
 
         # actions
-        self.control_loop()
+        self.lc.handle()
+        if self.robot_enabled == True:
+            self.control_loop()
         
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
@@ -57,6 +60,7 @@ class Controller:
         self.tau_J         = rst.tau_J
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
+        self.robot_enabled = rst.robot_enabled
     
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)

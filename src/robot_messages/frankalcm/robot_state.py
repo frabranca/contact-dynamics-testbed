@@ -10,11 +10,11 @@ except ImportError:
 import struct
 
 class robot_state(object):
-    __slots__ = ["q", "q_d", "dq", "dq_d", "ddq_d", "tau_J", "tau_J_d", "dtau_J"]
+    __slots__ = ["q", "q_d", "dq", "dq_d", "ddq_d", "tau_J", "tau_J_d", "dtau_J", "robot_enabled"]
 
-    __typenames__ = ["double", "double", "double", "double", "double", "double", "double", "double"]
+    __typenames__ = ["double", "double", "double", "double", "double", "double", "double", "double", "boolean"]
 
-    __dimensions__ = [[7], [7], [7], [7], [7], [7], [7], [7]]
+    __dimensions__ = [[7], [7], [7], [7], [7], [7], [7], [7], None]
 
     def __init__(self):
         self.q = [ 0.0 for dim0 in range(7) ]
@@ -25,6 +25,7 @@ class robot_state(object):
         self.tau_J = [ 0.0 for dim0 in range(7) ]
         self.tau_J_d = [ 0.0 for dim0 in range(7) ]
         self.dtau_J = [ 0.0 for dim0 in range(7) ]
+        self.robot_enabled = False
 
     def encode(self):
         buf = BytesIO()
@@ -41,6 +42,7 @@ class robot_state(object):
         buf.write(struct.pack('>7d', *self.tau_J[:7]))
         buf.write(struct.pack('>7d', *self.tau_J_d[:7]))
         buf.write(struct.pack('>7d', *self.dtau_J[:7]))
+        buf.write(struct.pack(">b", self.robot_enabled))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -62,13 +64,14 @@ class robot_state(object):
         self.tau_J = struct.unpack('>7d', buf.read(56))
         self.tau_J_d = struct.unpack('>7d', buf.read(56))
         self.dtau_J = struct.unpack('>7d', buf.read(56))
+        self.robot_enabled = bool(struct.unpack('b', buf.read(1))[0])
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if robot_state in parents: return 0
-        tmphash = (0xc1375c5387509a59) & 0xffffffffffffffff
+        tmphash = (0x37cf422f6574ed5a) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

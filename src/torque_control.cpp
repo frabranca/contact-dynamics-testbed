@@ -92,6 +92,7 @@ try {
             msg_to_send.tau_J_d[i] = state.tau_J_d[i];
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
+        msg_to_send.robot_enabled = true;
 
         lcm.publish("ROBOT STATE", &msg_to_send);
         lcm.handle();
@@ -110,6 +111,8 @@ try {
     };
 
     // Start real-time control loop.
+    msg_to_send.robot_enabled = true;
+    lcm.publish("ROBOT STATE", &msg_to_send);
     robot.control(torque_control);
 
   } catch (const franka::Exception& ex) {
