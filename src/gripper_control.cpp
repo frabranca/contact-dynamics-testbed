@@ -68,7 +68,8 @@ int main(int argc, char** argv) {
     std::cout << gcm_struct.width << ' ';
     std::cout << gcm_struct.speed << ' ';
     std::cout << gcm_struct.force << std::endl;
-    gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
+    if (gcm_struct.width > 0.){
+    gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);}
     
   } catch (franka::Exception const& e) {
         std::cout << e.what() << std::endl;

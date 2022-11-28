@@ -77,7 +77,7 @@ class Controller:
         self.message("loop started")
         while not loop_closed:
             self.lc.handle()
-
+            
             # control logic
             self.rcm.tau_J_d = self.tau_J_d
             self.lc.publish(self.rcm_channel, self.rcm.encode())
