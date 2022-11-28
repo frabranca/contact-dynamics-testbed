@@ -28,3 +28,5 @@ ls -l driver.sh
 ./driver.sh
 ```
 
+The files have to be run in the order specified in the bash script `driver.sh`, for the driver to work properly.
+
