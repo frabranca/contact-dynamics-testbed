@@ -36,7 +36,7 @@ class Handler
 };
 
 void message(const char* input){
-  std::cout << "gripper_control.cpp" << input << std::endl;
+  std::cout << "gripper_control.cpp " << input << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -61,6 +61,9 @@ int main(int argc, char** argv) {
 
     // wait for message to use gripper
     lcm.handle();
+    std::cout << gcm_struct.width << ' ';
+    std::cout << gcm_struct.speed << ' ';
+    std::cout << gcm_struct.force << std::endl;
     gripper.grasp(gcm_struct.width, gcm_struct.speed, gcm_struct.force);
     
   } catch (franka::Exception const& e) {

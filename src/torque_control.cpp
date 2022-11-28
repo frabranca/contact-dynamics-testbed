@@ -35,7 +35,7 @@ class Handler
 };
 
 void message(const char* input){
-  std::cout << "torque_control.cpp" << input << std::endl;
+  std::cout << "torque_control.cpp " << input << std::endl;
 }
 
 int main(int argc, char** argv) {
