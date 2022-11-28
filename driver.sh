@@ -5,3 +5,4 @@ sudo ./build/torque_control 192.168.131.40 &
 sudo ./build/gripper_control 192.168.131.40
 
 
+

@@ -42,7 +42,7 @@ class Controller:
 
         # actions
         self.lc.handle()
-        if self.robot_enabled == True and self.gripper_enabled == True:
+        if self.robot_enabled == True:
             self.control_loop()
         
         self.lc.unsubscribe(self.robot_sub)
