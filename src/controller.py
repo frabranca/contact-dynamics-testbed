@@ -101,7 +101,7 @@ class Controller:
         self.message("gripper command sent")
     
     def write_output(self):
-        output = open("output", "w")
+        output = open("src/output", "w")
         output.truncate()
         for i in range(len(self.tau_J_save)):
             output.write(str(self.time_save[i]) + ' ' + ' '.join(map(str, self.tau_J_save[i])) + '\n')
