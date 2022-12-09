@@ -9,6 +9,9 @@
 
 #include "utils/common_functions.cpp"
 
+// test to grasp metal rod with the 3D printed gripper clamp
+// the grasping position can be found by moving the franka by hand and running the code echo_robot_state.cpp
+
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
   if (argc != 2) {
@@ -22,8 +25,9 @@ int main(int argc, char** argv) {
     franka:Gripper gripper(argv[1]);
 
     gripper.homing();
-    std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
-    MotionGenerator motion_generator(0.5, q_goal);
+    // insert grasping position
+    std::array<double, 7> q_grasp = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_grasp);
     gripper.grasp(0.02, 10, 60);
 
   } catch (franka::Exception const& e) {
