@@ -1,0 +1,8 @@
+package motorlcm;
+
+struct motor_state
+{
+   double motor_pos;
+   double motor_vel;
+   double motor_tau;
+}
