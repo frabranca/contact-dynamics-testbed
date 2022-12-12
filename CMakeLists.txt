@@ -15,6 +15,12 @@ add_executable(torque_control
 
 add_executable(gripper_control
 	src/gripper_control.cpp)
+
+add_executable(grasp_rod
+	src/utils/grasp_rod.cpp)
+
+add_executable(echo_robot_state
+	src/utils/echo_robot_state.cpp)
 	
 target_link_libraries(torque_control
 	Franka::Franka
@@ -23,3 +29,10 @@ target_link_libraries(torque_control
 target_link_libraries(gripper_control
 	Franka::Franka
 	lcm)
+
+target_link_libraries(grasp_rod
+	Franka::Franka)
+
+target_link_libraries(echo_robot_state
+	Franka::Franka)
+

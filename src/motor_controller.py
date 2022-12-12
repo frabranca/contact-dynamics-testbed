@@ -4,22 +4,16 @@ from motor_driver.canmotorlib import CanMotorController
 import matplotlib.pyplot as plt
 from motor_messages.motorlcm import motor_state
 import lcm
-import pandas as pd
 
 can_port = 'can0'
 motor_id = 12
 motor_01 = CanMotorController(can_port, motor_id, motor_type="AK80_9_V1p1")
 
 class motor_controller:
-    def __init__(self, can_port, motor_id, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE"):
+    def __init__(self, can_port, motor_id, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):
         self.plot = plot
         self.channel = channel
-
-        data = {
-        "position": [],
-        "velocity": [],
-        "torque": []}
-        self.df = pd.DataFrame(data)
+        self.communication = communication
 
         self.lc = lcm.LCM()
         self.motor = CanMotorController(can_port, motor_id, motor_type=motor_type)
@@ -30,7 +24,7 @@ class motor_controller:
         start = time.time()
         mst = motor_state()
         i = 0
-        n = 10000
+        n = 20000
         time_ = []
         pos_ = []
         vel_ = []
@@ -39,7 +33,7 @@ class motor_controller:
         tau_f = []
 
         while i < n:
-            if i > 8000:
+            if i > 10000:
                 pos, vel, tau = self.motor.send_deg_command(0, 0, 0, 0, 0)
             else:
                 pos, vel, tau = self.motor.send_deg_command(0, 20, 0, 5, 0)
@@ -56,12 +50,13 @@ class motor_controller:
                 tau_filtered = 0
             i+=1
             
-            mst.motor_pos = pos
-            mst.motor_vel = vel
-            mst.motor_tau = tau
-            self.lc.publish(self.channel, mst.encode())
+            if self.communication:
+                mst.motor_pos = pos
+                mst.motor_vel = vel
+                mst.motor_tau = tau
+                self.lc.publish(self.channel, mst.encode())
 
-            if self.plot == True:
+            if self.plot:
                 time_.append(time.time()-start)
                 pos_.append(pos)
                 vel_.append(vel)
@@ -86,5 +81,5 @@ class motor_controller:
 
 if __name__=="__main__":
     can_port = 'can0'
-    motor_id = 12
-    motor_controller(can_port, motor_id, plot=True)
+    motor_id = 1
+    motor_controller(can_port, motor_id, plot=False, communication=True)

@@ -39,11 +39,6 @@ void message(const char* input){
 }
 
 int main(int argc, char** argv) {
-  // Check whether the required arguments were passed.
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
-    return -1;
-  }
 
   lcm::LCM lcm;
   frankalcm::robot_state msg_to_send;
@@ -53,7 +48,7 @@ int main(int argc, char** argv) {
 
 try {
     // Connect to robot.
-    franka::Robot robot(argv[1]);
+    franka::Robot robot("192.168.131.40");
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration

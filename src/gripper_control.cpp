@@ -41,10 +41,6 @@ void message(const char* input){
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
-    return -1;
-  }
 
   lcm::LCM lcm;
   frankalcm::gripper_state msg_to_send;
@@ -54,7 +50,7 @@ int main(int argc, char** argv) {
 
   try {
     // if gripper is fully open send message to controller to say that homing is complete
-    franka::Gripper gripper(argv[1]);
+    franka::Gripper gripper("192.168.131.40");
     franka::GripperState gripper_state = gripper.readOnce();
     gripper.homing();
     message("homing done");

@@ -55,6 +55,7 @@ class Controller:
         
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
+        self.lc.unsubscribe(self.motor_sub)
 
         if save_output:
             self.write_output()
@@ -92,6 +93,7 @@ class Controller:
         self.message("loop started")
         while not loop_closed:
             self.lc.handle()
+            print(self.motor_pos)
             rcm = robot_command()
             # control logic
             rcm.tau_J_d = self.tau_J_d
