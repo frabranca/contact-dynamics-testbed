@@ -1,10 +1,13 @@
 import lcm
 from robot_messages.frankalcm import robot_state, robot_command, gripper_command, gripper_state
+from motor_messages.motorlcm import motor_state
 import time
 
 class Controller:
-    def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, save_output=False):
+    def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, mst_channel, save_output=False):
         # initiate state variables as zeros
+
+        # robot joints
         self.q   = 0
         self.q_d = 0
         self.dq = 0
@@ -13,9 +16,16 @@ class Controller:
         self.tau_J = 0
         self.tau_J_d = 0
         self.dtau_J = 0
-        self.width = 0
         self.robot_enabled = False
+
+        # gripper
+        self.width = 0
         self.gripper_enabled = False
+
+        # motor
+        self.motor_pos = 0
+        self.motor_vel = 0
+        self.motor_tau = 0
 
         # useful booleans
         self.gripper_moved = False
@@ -30,11 +40,13 @@ class Controller:
         self.rcm_channel = rcm_channel
         self.gcm_channel = gcm_channel
         self.gst_channel = gst_channel
+        self.mst_channel = mst_channel
 
         # subscribe to channels
         self.lc = lcm.LCM()
         self.robot_sub = self.lc.subscribe(self.rst_channel, self.robot_handler)
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
+        self.motor_sub = self.lc.subscribe(self.mst_channel, self.motor_handler)
 
         # actions
         self.lc.handle()
@@ -62,7 +74,14 @@ class Controller:
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)
         self.width           = gst.width 
-        self.gripper_enabled = gst.gripper_enabled 
+        self.gripper_enabled = gst.gripper_enabled
+
+    def motor_handler(self, channel, data):
+        mst = motor_state.decode(data)
+        self.motor_pos = mst.motor_pos
+        self.motor_vel = mst.motor_vel
+        self.motor_tau = mst.motor_tau
+        self.message("motor data received")
     
     def message(self, string):
         print("controller.py: " + string)
@@ -108,4 +127,8 @@ class Controller:
         output.close()
         
 if __name__ == "__main__":
-    controller = Controller("ROBOT STATE", "ROBOT COMMAND", "GRIPPER STATE", "GRIPPER COMMAND")    
+    controller = Controller("ROBOT STATE", 
+                            "ROBOT COMMAND", 
+                            "GRIPPER STATE", 
+                            "GRIPPER COMMAND", 
+                            "MOTOR_STATE")
