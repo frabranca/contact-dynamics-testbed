@@ -10,7 +10,7 @@ except ImportError:
 import struct
 
 class motor_state(object):
-    __slots__ = ["motor_pos", "motor_vel", "motor_tau"]
+    __slots__ = ["motor_pos", "motor_vel", "motor_cur"]
 
     __typenames__ = ["double", "double", "double"]
 
@@ -19,7 +19,7 @@ class motor_state(object):
     def __init__(self):
         self.motor_pos = 0.0
         self.motor_vel = 0.0
-        self.motor_tau = 0.0
+        self.motor_cur = 0.0
 
     def encode(self):
         buf = BytesIO()
@@ -28,7 +28,7 @@ class motor_state(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ddd", self.motor_pos, self.motor_vel, self.motor_tau))
+        buf.write(struct.pack(">ddd", self.motor_pos, self.motor_vel, self.motor_cur))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -42,14 +42,14 @@ class motor_state(object):
 
     def _decode_one(buf):
         self = motor_state()
-        self.motor_pos, self.motor_vel, self.motor_tau = struct.unpack(">ddd", buf.read(24))
+        self.motor_pos, self.motor_vel, self.motor_cur = struct.unpack(">ddd", buf.read(24))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if motor_state in parents: return 0
-        tmphash = (0x3af270c4b540bf4b) & 0xffffffffffffffff
+        tmphash = (0x3af270c4b56268ba) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

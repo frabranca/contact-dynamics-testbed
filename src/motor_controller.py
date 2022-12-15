@@ -5,15 +5,15 @@ import matplotlib.pyplot as plt
 from motor_messages.motorlcm import motor_state
 import lcm
 
-can_port = 'can0'
-motor_id = 12
-motor_01 = CanMotorController(can_port, motor_id, motor_type="AK80_9_V1p1")
-
 class motor_controller:
-    def __init__(self, can_port, motor_id, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):
+    def __init__(self, can_port, motor_id, K_d, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):
+        self.K_d = K_d
         self.plot = plot
         self.channel = channel
         self.communication = communication
+
+        true_velocity = 45
+        self.velocity = true_velocity
 
         self.lc = lcm.LCM()
         self.motor = CanMotorController(can_port, motor_id, motor_type=motor_type)
@@ -24,36 +24,35 @@ class motor_controller:
         start = time.time()
         mst = motor_state()
         i = 0
-        n = 20000
         time_ = []
         pos_ = []
         vel_ = []
         vel_f = []
-        tau_ = []
-        tau_f = []
+        cur_ = []
+        cur_f = []
 
-        while i < n:
-            if i > 10000:
-                pos, vel, tau = self.motor.send_deg_command(0, 0, 0, 0, 0)
+        while (time.time() - start) < 4.:
+            if (time.time() - start) >= 4.:
+                pos, vel, cur = self.motor.send_rad_command(0, 0, 0, 0, 0)
             else:
-                pos, vel, tau = self.motor.send_deg_command(0, 20, 0, 5, 0)
+                pos, vel, cur = self.motor.send_deg_command(90, 0, 0.1, 5, 5)
+                #pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)
 
             # filter
             filter = 50
             filter_size = filter-1
             if i > filter_size+1:
                 vel_filtered = sum(vel_[i-filter_size:i+1]) / (filter_size+1)
-                tau_filtered = sum(tau_[i-filter_size:i+1]) / (filter_size+1)
-                #vel_filtered = (vel_[i] + vel_[i-1] + vel_[i-2] + vel_[i-3] + vel_[i-4])/5
+                cur_filtered = sum(cur_[i-filter_size:i+1]) / (filter_size+1)
             else:
                 vel_filtered = 0
-                tau_filtered = 0
+                cur_filtered = 0
             i+=1
             
             if self.communication:
                 mst.motor_pos = pos
                 mst.motor_vel = vel
-                mst.motor_tau = tau
+                mst.motor_cur = cur
                 self.lc.publish(self.channel, mst.encode())
 
             if self.plot:
@@ -61,25 +60,38 @@ class motor_controller:
                 pos_.append(pos)
                 vel_.append(vel)
                 vel_f.append(vel_filtered)
-                tau_.append(tau)    
-                tau_f.append(tau_filtered)
+                cur_.append(cur)    
+                cur_f.append(cur_filtered)
 
         print("Disabling Motors...")
-        self.motor.send_deg_command(0, 0, 0, 0, 0)
         self.motor.disable_motor()
 
         if self.plot:
+            cosine = np.cos(np.radians(pos_))
+            plt.figure()
             plt.subplot(311)
-            plt.plot(time_, pos_)
+            plt.plot(time_, cosine)
+            plt.grid()
             plt.subplot(312)
             plt.plot(time_, vel_)
             plt.plot(time_, vel_f)
+            plt.grid()
             plt.subplot(313)
-            plt.plot(time_, tau_)
-            plt.plot(time_, tau_f)
+            plt.plot(time_, cur_)
+            plt.plot(time_, cur_f)
+            plt.grid()
+            
+            print(abs(cosine[-1]-cosine[0]))
+            # error = np.abs(np.array(vel_f) - self.velocity) 
+            # half = int(len(error)/2)
+            # print(sum(error[half:-1]))
+            # plt.figure()
+            # plt.plot(time_, error)
+            # plt.grid()
             plt.show()
+
 
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 1
-    motor_controller(can_port, motor_id, plot=False, communication=True)
+    motor_controller(can_port, motor_id, 7, plot=True, communication=False)
