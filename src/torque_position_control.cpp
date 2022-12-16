@@ -19,7 +19,7 @@ try {
 
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
-    //MotionGenerator motion_generator(0.5, q_goal);
+    MotionGenerator motion_generator(0.5, q_goal);
 
     //robot.control(motion_generator);
     message("Finished moving to initial joint configuration.");
@@ -51,7 +51,7 @@ try {
     };
 
     // Start real-time control loop.
-    robot.control(torque_control, motion_generator);
+    robot.control(motion_generator);
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;

@@ -16,10 +16,10 @@ int main(int argc, char** argv) {
     franka::Robot robot("192.168.131.40");
     franka::RobotState robot_state = robot.readOnce();
     
-    for (int i=0; i<7; i++){
-            std::cout << robot_state.q[i] << std::endl;
+    for (int i=0; i<16; i++){
+            std::cout << robot_state.F_T_EE[i] << std::endl;
         }
-    
+
     }
 
    catch (franka::Exception const& e) {
