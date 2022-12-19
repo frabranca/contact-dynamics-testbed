@@ -23,9 +23,10 @@ class Controller:
         self.gripper_enabled = False
 
         # motor
-        self.motor_pos = 0
+        self.motor_xmf = 0
+        self.motor_ymf = 0
         self.motor_vel = 0
-        self.motor_tau = 0
+        self.motor_cur = 0
 
         # useful booleans
         self.gripper_moved = False
@@ -79,9 +80,10 @@ class Controller:
 
     def motor_handler(self, channel, data):
         mst = motor_state.decode(data)
-        self.motor_pos = mst.motor_pos
+        self.motor_xmf = mst.motor_xmf
+        self.motor_ymf = mst.motor_ymf
         self.motor_vel = mst.motor_vel
-        self.motor_tau = mst.motor_tau
+        self.motor_cur = mst.motor_cur
         self.message("motor data received")
     
     def message(self, string):

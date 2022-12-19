@@ -2,7 +2,8 @@ package motorlcm;
 
 struct motor_state
 {
-   double motor_pos;
+   double motor_xmf;
+   double motor_ymf;
    double motor_vel;
    double motor_cur;
 }

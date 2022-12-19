@@ -6,14 +6,12 @@ from motor_messages.motorlcm import motor_state
 import lcm
 
 class motor_controller:
-    def __init__(self, can_port, motor_id, K_d, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):
-        self.K_d = K_d
+    def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):
+        self.t = t
+        self.velocity = velocity
         self.plot = plot
         self.channel = channel
         self.communication = communication
-
-        true_velocity = 45
-        self.velocity = true_velocity
 
         self.lc = lcm.LCM()
         self.motor = CanMotorController(can_port, motor_id, motor_type=motor_type)
@@ -31,13 +29,13 @@ class motor_controller:
         cur_ = []
         cur_f = []
 
-        while (time.time() - start) < 4.:
-            if (time.time() - start) >= 4.:
-                pos, vel, cur = self.motor.send_rad_command(0, 0, 0, 0, 0)
+        while (time.time() - start) < self.t:
+            if (time.time() - start) >= self.t:
+                # pos, vel, cur = self.motor.send_rad_command(0, 0, 0, 0, 0)
+                self.motor.send_rad_command(0, 0, 0, 0, 0)
             else:
-                pos, vel, cur = self.motor.send_deg_command(90, 0, 0.1, 5, 5)
+                pos, vel, cur = self.motor.send_deg_command(0, self.velocity, 0, 5, 0)
                 #pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)
-
             # filter
             filter = 50
             filter_size = filter-1
@@ -81,17 +79,19 @@ class motor_controller:
             plt.plot(time_, cur_f)
             plt.grid()
             
-            print(abs(cosine[-1]-cosine[0]))
-            # error = np.abs(np.array(vel_f) - self.velocity) 
-            # half = int(len(error)/2)
-            # print(sum(error[half:-1]))
-            # plt.figure()
-            # plt.plot(time_, error)
-            # plt.grid()
+            print(abs(cosine[-1] - cosine[0]))
             plt.show()
-
 
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 1
-    motor_controller(can_port, motor_id, 7, plot=True, communication=False)
+    # motor_controller(can_port, motor_id, 4, 90, plot=True, communication=False)
+    motor = CanMotorController(can_port, motor_id, motor_type="AK80_9_V1p1")
+    motor.enable_motor()
+    pos, vel, tau = motor.send_rad_command(0, 0, 0, 0, 0)
+    radius = 0.335
+    # clockwise positive
+    x = radius*np.cos(pos) + 0.125
+    y = radius*np.sin(pos) + 0.100
+    print(x,y)
+    motor.disable_motor()
