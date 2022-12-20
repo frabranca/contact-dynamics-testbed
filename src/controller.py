@@ -2,12 +2,13 @@ import lcm
 from robot_messages.frankalcm import robot_state, robot_command, gripper_command, gripper_state
 from motor_messages.motorlcm import motor_state
 import time
+import matplotlib.pyplot as plt
 
 class Controller:
     def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, mst_channel, save_output=False):
         # initiate state variables as zeros
 
-        # robot joints
+        # robot states
         self.q   = 0
         self.q_d = 0
         self.dq = 0
@@ -17,12 +18,13 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.robot_enabled = False
+        self.xyz = 0
 
-        # gripper
+        # gripper states
         self.width = 0
         self.gripper_enabled = False
 
-        # motor
+        # motor states
         self.motor_xmf = 0
         self.motor_ymf = 0
         self.motor_vel = 0
@@ -35,6 +37,7 @@ class Controller:
         self.save_output = save_output
         self.tau_J_save = []
         self.time_save = []
+        self.xyz_save = []
 
         # define lcm channels
         self.rst_channel = rst_channel
@@ -45,9 +48,9 @@ class Controller:
 
         # subscribe to channels
         self.lc = lcm.LCM()
-        self.robot_sub = self.lc.subscribe(self.rst_channel, self.robot_handler)
+        self.robot_sub   = self.lc.subscribe(self.rst_channel, self.robot_handler)
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
-        self.motor_sub = self.lc.subscribe(self.mst_channel, self.motor_handler)
+        self.motor_sub   = self.lc.subscribe(self.mst_channel, self.motor_handler)
 
         # actions
         self.lc.handle()
@@ -57,6 +60,9 @@ class Controller:
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
         self.lc.unsubscribe(self.motor_sub)
+
+        plt.plot(self.time_save, self.xyz)
+        plt.show()
 
         if save_output:
             self.write_output()
@@ -72,6 +78,7 @@ class Controller:
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
         self.robot_enabled = rst.robot_enabled
+        self.xyz           = rst.xyz
     
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)
@@ -103,6 +110,7 @@ class Controller:
 
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
+                self.xyz_save.append(self.xyz)
                 self.time_save.append(time.time() - start_time)
 
             if (time.time()-start_time) > 10.0 and self.gripper_moved == False:

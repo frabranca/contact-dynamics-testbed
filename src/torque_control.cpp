@@ -14,6 +14,7 @@
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
+    std::array<double, 3> xyz;
     bool loop_closed_received;
 };
 
@@ -87,6 +88,11 @@ try {
             msg_to_send.tau_J_d[i] = state.tau_J_d[i];
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
+
+        for (int i=0; i<3; i++){
+            msg_to_send.xyz[i] = state.O_T_EE_C[i+12];
+        }
+
         msg_to_send.robot_enabled = true;
 
         lcm.publish("ROBOT STATE", &msg_to_send);
