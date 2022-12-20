@@ -64,6 +64,8 @@ class Controller:
         self.lc.unsubscribe(self.motor_sub)
         
         if self.plot_data:
+            self.tau_J_save = np.array(self.tau_J_save)
+            self.xyz_save = np.array(self.xyz_save)
             self.plot()
 
         if save_output:
@@ -104,7 +106,6 @@ class Controller:
         self.message("loop started")
         while not loop_closed:
             self.lc.handle()
-            print(self.xyz)
             rcm = robot_command()
             # control logic
             rcm.tau_J_d = self.tau_J_d
@@ -115,11 +116,11 @@ class Controller:
                 self.xyz_save.append(self.xyz)
                 self.time_save.append(time.time() - start_time)
 
-            if (time.time()-start_time) > 5.0 and self.gripper_moved == False:
+            if (time.time()-start_time) > 1.0 and self.gripper_moved == False:
                 self.gripper_moved = True
                 self.move_gripper(0.02, 10.0, 60.0)
             
-            if (time.time()-start_time) > 6.0:
+            if (time.time()-start_time) > 5.0:
                 rcm.loop_closed = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 self.message("loop closed")
@@ -134,22 +135,21 @@ class Controller:
         self.message("gripper command sent")
     
     def plot(self):
-
         labels = ("x","y","z")
-        x_val = [x[0] for x in self.xyz_save]
-        y_val = [y[1] for y in self.xyz_save]
-        z_val = [z[2] for z in self.xyz_save]
 
         plt.figure()
-        plt.plot(self.time_save, x_val, label=labels[0])
-        plt.plot(self.time_save, y_val, label=labels[1])
-        plt.plot(self.time_save, z_val, label=labels[2])
+        for i in range(3):
+        	plt.plot(self.time_save, self.xyz_save[:,i], label = labels[i])
+        plt.legend()
+        plt.grid()
 
         plt.figure()
         for i in range(7):
-            plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i))
+            plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i+1))
         
         plt.legend()
+        plt.grid()
+        
         plt.show()
     
     def write_output(self):
@@ -165,4 +165,4 @@ if __name__ == "__main__":
                             "ROBOT COMMAND", 
                             "GRIPPER STATE", 
                             "GRIPPER COMMAND", 
-                            "MOTOR_STATE", save_output=True)
+                            "MOTOR_STATE", save_output=True, plot_data=True)
