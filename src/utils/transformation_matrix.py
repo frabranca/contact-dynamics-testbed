@@ -24,4 +24,4 @@ def T(w, th, p):
     T = np.vstack((np.hstack((R, p)),row))
     return np.round(T,3)
 
-print(T((0,0,1), pi/2, (0,2,0)))
+print(T((0,0,2), pi/2, (0,2,0)))

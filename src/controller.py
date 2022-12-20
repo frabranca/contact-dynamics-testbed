@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Controller:
-    def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, mst_channel, save_output=False):
+    def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, mst_channel, save_output=False, plot_data=False):
         # initiate state variables as zeros
 
         # robot states
@@ -33,6 +33,7 @@ class Controller:
 
         # useful booleans
         self.gripper_moved = False
+        self.plot_data = plot_data
 
         # lists to save output
         self.save_output = save_output
@@ -62,18 +63,8 @@ class Controller:
         self.lc.unsubscribe(self.gripper_sub)
         self.lc.unsubscribe(self.motor_sub)
         
-        labels = ("x","y","z")
-        x_val = [x[0] for x in self.xyz_save]
-        y_val = [y[1] for y in self.xyz_save]
-        z_val = [z[2] for z in self.xyz_save]
-        
-        plt.plot(self.time_save, x_val, label=labels[0])
-        plt.plot(self.time_save, y_val, label=labels[1])
-        plt.plot(self.time_save, z_val, label=labels[2])
-        
-        plt.legend()
-        plt.show()
-        #print(np.array(self.xyz_save))
+        if self.plot_data:
+            self.plot()
 
         if save_output:
             self.write_output()
@@ -142,11 +133,31 @@ class Controller:
         self.lc.publish(self.gcm_channel, gcm.encode())
         self.message("gripper command sent")
     
+    def plot(self):
+
+        labels = ("x","y","z")
+        x_val = [x[0] for x in self.xyz_save]
+        y_val = [y[1] for y in self.xyz_save]
+        z_val = [z[2] for z in self.xyz_save]
+
+        plt.figure()
+        plt.plot(self.time_save, x_val, label=labels[0])
+        plt.plot(self.time_save, y_val, label=labels[1])
+        plt.plot(self.time_save, z_val, label=labels[2])
+
+        plt.figure()
+        for i in range(7):
+            plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i))
+        
+        plt.legend()
+        plt.show()
+    
     def write_output(self):
         output = open("output", "w")
         output.truncate()
         for i in range(len(self.tau_J_save)):
-            output.write(str(self.time_save[i]) + ' ' + ' '.join(map(str, self.tau_J_save[i])) + '\n')
+            output.write(str(self.time_save[i]) + ' ' + ' '.join(map(str, self.tau_J_save[i])) + 
+            ' ' + str(self.xyz_save[i][0]) + ' ' + str(self.xyz_save[i][1]) + ' ' + str(self.xyz_save[i][2]) + '\n')
         output.close()
         
 if __name__ == "__main__":
