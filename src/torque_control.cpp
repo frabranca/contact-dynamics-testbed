@@ -90,7 +90,7 @@ try {
         }
 
         for (int i=0; i<3; i++){
-            msg_to_send.xyz[i] = state.O_T_EE_C[i+12];
+            msg_to_send.xyz[i] = state.O_T_EE[i+12];
         }
 
         msg_to_send.robot_enabled = true;

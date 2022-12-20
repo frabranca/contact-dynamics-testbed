@@ -47,7 +47,6 @@ class motor_state(object):
         return self
     _decode_one = staticmethod(_decode_one)
 
-    _hash = None
     def _get_hash_recursive(parents):
         if motor_state in parents: return 0
         tmphash = (0x16b12a2a044c5fac) & 0xffffffffffffffff
@@ -61,4 +60,8 @@ class motor_state(object):
             motor_state._packed_fingerprint = struct.pack(">Q", motor_state._get_hash_recursive([]))
         return motor_state._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", motor_state._get_packed_fingerprint())[0]
 

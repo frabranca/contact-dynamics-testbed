@@ -3,6 +3,7 @@ from robot_messages.frankalcm import robot_state, robot_command, gripper_command
 from motor_messages.motorlcm import motor_state
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 class Controller:
     def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, mst_channel, save_output=False):
@@ -60,9 +61,19 @@ class Controller:
         self.lc.unsubscribe(self.robot_sub)
         self.lc.unsubscribe(self.gripper_sub)
         self.lc.unsubscribe(self.motor_sub)
-
-        plt.plot(self.time_save, self.xyz)
+        
+        labels = ("x","y","z")
+        x_val = [x[0] for x in self.xyz_save]
+        y_val = [y[1] for y in self.xyz_save]
+        z_val = [z[2] for z in self.xyz_save]
+        
+        plt.plot(self.time_save, x_val, label=labels[0])
+        plt.plot(self.time_save, y_val, label=labels[1])
+        plt.plot(self.time_save, z_val, label=labels[2])
+        
+        plt.legend()
         plt.show()
+        #print(np.array(self.xyz_save))
 
         if save_output:
             self.write_output()
@@ -102,7 +113,7 @@ class Controller:
         self.message("loop started")
         while not loop_closed:
             self.lc.handle()
-            print(self.motor_pos)
+            print(self.xyz)
             rcm = robot_command()
             # control logic
             rcm.tau_J_d = self.tau_J_d
@@ -113,11 +124,11 @@ class Controller:
                 self.xyz_save.append(self.xyz)
                 self.time_save.append(time.time() - start_time)
 
-            if (time.time()-start_time) > 10.0 and self.gripper_moved == False:
+            if (time.time()-start_time) > 5.0 and self.gripper_moved == False:
                 self.gripper_moved = True
                 self.move_gripper(0.02, 10.0, 60.0)
             
-            if (time.time()-start_time) > 20.0:
+            if (time.time()-start_time) > 6.0:
                 rcm.loop_closed = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 self.message("loop closed")
@@ -132,7 +143,7 @@ class Controller:
         self.message("gripper command sent")
     
     def write_output(self):
-        output = open("src/output", "w")
+        output = open("output", "w")
         output.truncate()
         for i in range(len(self.tau_J_save)):
             output.write(str(self.time_save[i]) + ' ' + ' '.join(map(str, self.tau_J_save[i])) + '\n')
@@ -143,4 +154,4 @@ if __name__ == "__main__":
                             "ROBOT COMMAND", 
                             "GRIPPER STATE", 
                             "GRIPPER COMMAND", 
-                            "MOTOR_STATE")
+                            "MOTOR_STATE", save_output=True)
