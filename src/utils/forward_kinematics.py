@@ -15,6 +15,11 @@ class ForwardKinematics:
                 "d": [0.333, 0, 0.316, 0, 0.384, 0, 0, 0.107],
                 "alpha": [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2, 0],
                 "theta": theta_list}
+        
+        # dict = {"a": [    0,     0,     0,    0.0825, -0.0825,      0,  0.088,    0],
+        #         "d": [0.135, 0.198, 0.195,     0.121,    0.11,  0.274,      0, .107],
+        #         "alpha": [0, -pi/2, pi/2, pi/2, -pi/2, pi/2, pi/2, 0],
+        #         "theta": theta_list}
 
         idx = ["Joint 1", "Joint 2", "Joint 3", "Joint 4", 
             "Joint 5", "Joint 6", "Joint 7", "Flange"]
@@ -45,13 +50,15 @@ class ForwardKinematics:
         tmi = np.round(tmi,4)
         return tmi, xyz
 
-# init_pose = [0, -pi/4, 0, -3 * pi/4, 0, pi/2, pi/4]
-init_pose = [0,0,pi/4,0,0,0,0]
+init_pose = [0, -pi/4, 0, -3*pi/4, -pi/2, pi/2, 3*pi/4]
+# init_pose = [0,0,pi/4,0,0,0,0]
 
 fk = ForwardKinematics(init_pose)
 x = fk.xyz[:,0]
 y = fk.xyz[:,1]
 z = fk.xyz[:,2]
+
+print(fk.tm)
 
 ax = plt.axes(projection='3d')
 ax.plot3D(x,y,z)
