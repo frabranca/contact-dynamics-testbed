@@ -22,7 +22,9 @@ int main(int argc, char** argv) {
 
     gripper.homing();
     // insert grasping position
+    //std::array<double, 7> q_grasp = {{0, -M_PI_4, 0, -3 * M_PI_4, -M_PI_2, M_PI_2, 3*M_PI_4}};
     std::array<double, 7> q_grasp = {{0, -M_PI_4, 0, -3 * M_PI_4, -M_PI_2, M_PI_2, 3*M_PI_4}};
+    
     MotionGenerator motion_generator(0.5, q_grasp);
     robot.control(motion_generator);
     gripper.grasp(0.02, 10, 60);
