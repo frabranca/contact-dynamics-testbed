@@ -140,6 +140,7 @@ class Controller:
         plt.figure()
         for i in range(3):
         	plt.plot(self.time_save, self.xyz_save[:,i], label = labels[i])
+            
         plt.legend()
         plt.grid()
 
