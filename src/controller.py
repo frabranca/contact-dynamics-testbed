@@ -19,7 +19,7 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.robot_enabled = False
-        self.pose = [0]*16
+        self.pose = [0,0,0]
 
         # gripper states
         self.width = 0
@@ -113,11 +113,13 @@ class Controller:
 
             radius = 0.3
             t = time.time()-start_time
-            angle = np.pi/4 * (1 - np.cos(np.pi/2.0 * t))
+            angle = np.pi/4 * (1 - np.cos(np.pi * t/2.0))
 
-            rcm.pose[12] = radius * np.sin(angle)
-            rcm.pose[13] = 0
-            rcm.pose[14] = radius * (np.cos(angle) - 1)
+            rcm.pose[0] = radius * np.sin(angle)
+            rcm.pose[1] = 0
+            rcm.pose[2] = radius * (np.cos(angle) - 1)
+            
+            #print(rcm.pose[0], rcm.pose[1], rcm.pose[2])
             
             #-----------------------------------------------------------------
             
@@ -132,7 +134,7 @@ class Controller:
                 self.gripper_moved = True
                 self.move_gripper(0.02, 10.0, 60.0)
             
-            if (time.time()-start_time) > 5.0:
+            if (time.time()-start_time) > 10.0:
                 rcm.loop_closed = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 self.message("loop closed")

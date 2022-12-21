@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
         initial_pose = robot_state.O_T_EE_c;
       }
       
+      std::cout << time << ",";
       std::cout << robot_state.O_T_EE_c[12] << ",";
       std::cout << robot_state.O_T_EE_c[13] << ",";
       std::cout << robot_state.O_T_EE_c[14] << std::endl;      
