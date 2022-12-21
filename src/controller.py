@@ -54,6 +54,10 @@ class Controller:
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
         self.motor_sub   = self.lc.subscribe(self.mst_channel, self.motor_handler)
 
+        # calculate trajectory
+        self.x_trajectory = self.trajectory()[0]
+        self.z_trajectory = self.trajectory()[1]
+
         # actions
         self.lc.handle()
         if self.robot_enabled == True:
@@ -70,6 +74,15 @@ class Controller:
 
         if save_output:
             self.write_output()
+
+    def trajectory(self):
+        radius = 0.3
+        t = np.arange(0,10,0.001)
+        angle = np.pi/4 * (1 - np.cos(np.pi * t/2.0))
+        x = radius * np.sin(angle)
+        z = radius * (np.cos(angle) - 1)
+        return x,z
+
 
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
@@ -104,6 +117,7 @@ class Controller:
         start_time = time.time()
         loop_closed = False
         self.message("loop started")
+        i = 0
         while not loop_closed:
             #self.lc.handle()
             rcm = robot_command()
@@ -111,16 +125,11 @@ class Controller:
             # control logic --------------------------------------------------
             #rcm.tau_J_d = self.tau_J_d
 
-            radius = 0.3
-            t = time.time()-start_time
-            angle = np.pi/4 * (1 - np.cos(np.pi * t/2.0))
-
-            rcm.pose[0] = radius * np.sin(angle)
+            rcm.pose[0] = self.x_trajectory[i]
             rcm.pose[1] = 0
-            rcm.pose[2] = radius * (np.cos(angle) - 1)
-            
+            rcm.pose[2] = self.z_trajectory[i]
+            i += 1 
             #print(rcm.pose[0], rcm.pose[1], rcm.pose[2])
-            
             #-----------------------------------------------------------------
             
             self.lc.publish(self.rcm_channel, rcm.encode())
