@@ -80,17 +80,25 @@ try {
         pose_control = 
             [&](const franka::RobotState& state, franka::Duration period) -> franka::CartesianPose {
             
-            time += period.toSec();
-            lcm.handle();
-            std::array<double, 16> new_pose = initial_pose;
+            for (int i=0; i<3; i++){
+              msg_to_send.pose[i] = state.O_T_EE_c[i+12];}
             
-            std::cout << time << ",";
-            std::cout << rcm_struct.pose[0] << ", ";
-            std::cout << rcm_struct.pose[1] << ", ";
-            std::cout << rcm_struct.pose[2] << std::endl;
-            new_pose[12] += rcm_struct.pose[0];
-            new_pose[13] += rcm_struct.pose[1];
-            new_pose[14] += rcm_struct.pose[2];
+            msg_to_send.robot_enabled = true;
+
+            lcm.publish("ROBOT STATE", &msg_to_send);
+
+            // time += period.toSec();
+            lcm.handle();
+            std::array<double, 16> new_pose = state.O_T_EE_c;
+            
+            // std::cout << time << ",";
+            // std::cout << rcm_struct.pose[0] << ", ";
+            // std::cout << rcm_struct.pose[1] << ", ";
+            // std::cout << rcm_struct.pose[2] << std::endl;
+
+            new_pose[12] = rcm_struct.pose[0];
+            new_pose[13] = rcm_struct.pose[1];
+            new_pose[14] = rcm_struct.pose[2];
 
             if (rcm_struct.loop_closed_received == true) {
               message("Loop closed");

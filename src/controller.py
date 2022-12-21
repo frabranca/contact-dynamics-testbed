@@ -117,18 +117,18 @@ class Controller:
         start_time = time.time()
         loop_closed = False
         self.message("loop started")
-        i = 0
+
         while not loop_closed:
-            #self.lc.handle()
+            self.lc.handle()
             rcm = robot_command()
 
             # control logic --------------------------------------------------
             #rcm.tau_J_d = self.tau_J_d
 
-            rcm.pose[0] = self.x_trajectory[i]
-            rcm.pose[1] = 0
-            rcm.pose[2] = self.z_trajectory[i]
-            i += 1 
+            rcm.pose[0] = self.pose[0]
+            rcm.pose[1] = self.pose[1]
+            rcm.pose[2] = self.pose[2]
+
             #print(rcm.pose[0], rcm.pose[1], rcm.pose[2])
             #-----------------------------------------------------------------
             
