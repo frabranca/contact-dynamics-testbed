@@ -47,8 +47,14 @@ class motor_controller:
                 cur_filtered = 0
             i+=1
             
+            radius = 0.335
+            # clockwise positive
+            xmf = radius*np.cos(pos) + 0.125
+            ymf = radius*np.sin(pos) + 0.100
+
             if self.communication:
-                mst.motor_pos = pos
+                mst.motor_xmf = xmf
+                mst.motor_ymf = ymf
                 mst.motor_vel = vel
                 mst.motor_cur = cur
                 self.lc.publish(self.channel, mst.encode())

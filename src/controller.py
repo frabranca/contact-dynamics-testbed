@@ -10,7 +10,7 @@ class Controller:
         # initiate state variables as zeros
 
         # robot states
-        self.q   = 0
+        self.q = 0
         self.q_d = 0
         self.dq = 0
         self.dq_d = 0
@@ -19,7 +19,7 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.robot_enabled = False
-        self.xyz = 0
+        self.xyz = [0,0,0]
 
         # gripper states
         self.width = 0
@@ -107,8 +107,22 @@ class Controller:
         while not loop_closed:
             self.lc.handle()
             rcm = robot_command()
+
             # control logic
-            rcm.tau_J_d = self.tau_J_d
+            #rcm.tau_J_d = self.tau_J_d
+
+            #constexpr double kRadius = 0.3;
+            #double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
+            #double delta_x = kRadius * std::sin(angle);
+            #double delta_z = kRadius * (std::cos(angle) - 1);
+
+            radius = 0.3
+            t = time.time()-start_time
+            angle = np.pi / 4 * (1 - np.cos(np.pi / 2.0 * t))
+
+            rcm.xyz[0] = radius * np.sin(angle)
+            rcm.xyz[2] = radius * (np.cos(angle) - 1)
+            
             self.lc.publish(self.rcm_channel, rcm.encode())
 
             if self.save_output:
@@ -140,14 +154,12 @@ class Controller:
         plt.figure()
         for i in range(3):
         	plt.plot(self.time_save, self.xyz_save[:,i], label = labels[i])
-            
         plt.legend()
         plt.grid()
 
         plt.figure()
         for i in range(7):
             plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i+1))
-        
         plt.legend()
         plt.grid()
         

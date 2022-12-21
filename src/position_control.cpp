@@ -36,7 +36,7 @@ class Handler
 };
 
 void message(const char* input){
-  std::cout << "torque_control.cpp " << input << std::endl;
+  std::cout << "position_control.cpp " << input << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -82,13 +82,19 @@ try {
             if (time == 0.0) {
                 initial_pose = robot_state.O_T_EE_c;}
 
-            constexpr double kRadius = 0.3;
-            double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
-            double delta_x = kRadius * std::sin(angle);
-            double delta_z = kRadius * (std::cos(angle) - 1);
+            // constexpr double kRadius = 0.3;
+            // double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
+            // double delta_x = kRadius * std::sin(angle);
+            // double delta_z = kRadius * (std::cos(angle) - 1);
+
+            lcm.handle()
+            double delta_x = rcm_struct.xyz[0];
+            double delta_y = rcm_struct.xyz[1];
+            double delta_z = rcm_struct.xyz[2]; 
         
             std::array<double, 16> new_pose = initial_pose;
             new_pose[12] += delta_x;
+            new_pose[13] += delta_y;
             new_pose[14] += delta_z;
         
             if (time >= 10.0) {
