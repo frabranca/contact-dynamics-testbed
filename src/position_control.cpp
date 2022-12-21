@@ -72,7 +72,9 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Define callback for the joint torque control loop.
-    
+    std::array<double, 16> initial_pose;
+    double time = 0.0;
+
     std::function<franka::CartesianPose(const franka::RobotState&, franka::Duration period)>
         pose_control = 
             [&](const franka::RobotState& state, franka::Duration period) -> franka::CartesianPose {
@@ -80,14 +82,14 @@ try {
             time += period.toSec();
 
             if (time == 0.0) {
-                initial_pose = robot_state.O_T_EE_c;}
+                initial_pose = state.O_T_EE_c;}
 
             // constexpr double kRadius = 0.3;
             // double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
             // double delta_x = kRadius * std::sin(angle);
             // double delta_z = kRadius * (std::cos(angle) - 1);
 
-            lcm.handle()
+            lcm.handle();
             double delta_x = rcm_struct.xyz[0];
             double delta_y = rcm_struct.xyz[1];
             double delta_z = rcm_struct.xyz[2]; 

@@ -25,8 +25,8 @@ add_executable(echo_robot_state
 add_executable(torque_position_control 
 	src/torque_position_control.cpp)
 
-add_executable(pose_motion
-	src/utils/generate_cartesian_pose_motion.cpp)
+add_executable(position_control
+	src/position_control.cpp)
 	
 target_link_libraries(torque_control
 	Franka::Franka
@@ -46,6 +46,6 @@ target_link_libraries(torque_position_control
 	Franka::Franka
 	lcm)
 	
-target_link_libraries(pose_motion
+target_link_libraries(position_control
 	Franka::Franka
 	lcm)
