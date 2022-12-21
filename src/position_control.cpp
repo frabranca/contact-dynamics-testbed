@@ -84,11 +84,6 @@ try {
             if (time == 0.0) {
                 initial_pose = state.O_T_EE_c;}
 
-            // constexpr double kRadius = 0.3;
-            // double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
-            // double delta_x = kRadius * std::sin(angle);
-            // double delta_z = kRadius * (std::cos(angle) - 1);
-
             lcm.handle();
             double delta_x = rcm_struct.xyz[0];
             double delta_y = rcm_struct.xyz[1];

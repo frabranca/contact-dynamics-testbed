@@ -105,23 +105,21 @@ class Controller:
         loop_closed = False
         self.message("loop started")
         while not loop_closed:
-            self.lc.handle()
+            #self.lc.handle()
             rcm = robot_command()
 
             # control logic
             #rcm.tau_J_d = self.tau_J_d
 
-            #constexpr double kRadius = 0.3;
-            #double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
-            #double delta_x = kRadius * std::sin(angle);
-            #double delta_z = kRadius * (std::cos(angle) - 1);
-
             radius = 0.3
             t = time.time()-start_time
-            angle = np.pi / 4 * (1 - np.cos(np.pi / 2.0 * t))
+            angle = np.pi/4 * (1 - np.cos(np.pi/2.0 * t))
 
             rcm.xyz[0] = radius * np.sin(angle)
+            rcm.xyz[1] = 0
             rcm.xyz[2] = radius * (np.cos(angle) - 1)
+            
+            print(rcm.xyz)
             
             self.lc.publish(self.rcm_channel, rcm.encode())
 
@@ -178,4 +176,4 @@ if __name__ == "__main__":
                             "ROBOT COMMAND", 
                             "GRIPPER STATE", 
                             "GRIPPER COMMAND", 
-                            "MOTOR_STATE", save_output=True, plot_data=True)
+                            "MOTOR_STATE")

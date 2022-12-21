@@ -47,6 +47,10 @@ int main(int argc, char** argv) {
       if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_c;
       }
+      
+      std::cout << robot_state.O_T_EE_c[12] << ",";
+      std::cout << robot_state.O_T_EE_c[13] << ",";
+      std::cout << robot_state.O_T_EE_c[14] << std::endl;      
 
       constexpr double kRadius = 0.3;
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 2.0 * time));
