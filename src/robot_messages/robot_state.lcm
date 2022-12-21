@@ -11,5 +11,5 @@ struct robot_state
    double tau_J_d[7];
    double dtau_J[7];
    boolean robot_enabled;
-   double xyz[3];
+   double pose[16];
 }

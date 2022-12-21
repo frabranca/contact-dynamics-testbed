@@ -3,7 +3,7 @@ package frankalcm;
 struct robot_command
 { 
     double tau_J_d[7];
-    double xyz[3];
+    double pose[16];
     boolean loop_closed;
 }
 

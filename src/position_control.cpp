@@ -14,7 +14,7 @@
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> tau_received;
-    std::array<double, 3> xyz;
+    std::array<double, 3> pose;
     bool loop_closed_received;
 };
 
@@ -31,7 +31,7 @@ class Handler
               int i;
               rcm_struct.loop_closed_received = msg_received->loop_closed;
               for (i=0; i<3; i++){
-                rcm_struct.xyz[i] = msg_received->xyz[i];}
+                rcm_struct.pose[i] = msg_received->pose[i];}
               }
 };
 
@@ -72,31 +72,27 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Define callback for the joint torque control loop.
-    std::array<double, 16> initial_pose;
+    std::array<double, 16> initial_pose = state.O_T_EE_c;
     double time = 0.0;
 
     std::function<franka::CartesianPose(const franka::RobotState&, franka::Duration period)>
         pose_control = 
             [&](const franka::RobotState& state, franka::Duration period) -> franka::CartesianPose {
-            
-            time += period.toSec();
 
-            if (time == 0.0) {
-                initial_pose = state.O_T_EE_c;}
+            //time += period.toSec();
+            // if (time == 0.0) {
+            //     initial_pose = state.O_T_EE_c;}
 
             lcm.handle();
-            double delta_x = rcm_struct.xyz[0];
-            double delta_y = rcm_struct.xyz[1];
-            double delta_z = rcm_struct.xyz[2]; 
-        
             std::array<double, 16> new_pose = initial_pose;
-            new_pose[12] += delta_x;
-            new_pose[13] += delta_y;
-            new_pose[14] += delta_z;
-        
-            if (time >= 10.0) {
-                std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-                return franka::MotionFinished(new_pose);}
+            new_pose[12] += rcm_struct.pose[0];
+            new_pose[13] += rcm_struct.pose[1];
+            new_pose[14] += rcm_struct.pose[2];
+
+            if (rcm_struct.loop_closed_received == true) {
+              message("Loop closed");
+              return franka::MotionFinished(new_pose);}
+              
       return new_pose;
     };
 

@@ -19,7 +19,7 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.robot_enabled = False
-        self.xyz = [0,0,0]
+        self.pose = [0]*16
 
         # gripper states
         self.width = 0
@@ -82,7 +82,7 @@ class Controller:
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
         self.robot_enabled = rst.robot_enabled
-        self.xyz           = rst.xyz
+        self.pose          = rst.pose
     
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)
@@ -108,18 +108,18 @@ class Controller:
             #self.lc.handle()
             rcm = robot_command()
 
-            # control logic
+            # control logic --------------------------------------------------
             #rcm.tau_J_d = self.tau_J_d
 
             radius = 0.3
             t = time.time()-start_time
             angle = np.pi/4 * (1 - np.cos(np.pi/2.0 * t))
 
-            rcm.xyz[0] = radius * np.sin(angle)
-            rcm.xyz[1] = 0
-            rcm.xyz[2] = radius * (np.cos(angle) - 1)
+            rcm.pose[12] = radius * np.sin(angle)
+            rcm.pose[13] = 0
+            rcm.pose[14] = radius * (np.cos(angle) - 1)
             
-            print(rcm.xyz)
+            #-----------------------------------------------------------------
             
             self.lc.publish(self.rcm_channel, rcm.encode())
 
@@ -152,6 +152,7 @@ class Controller:
         plt.figure()
         for i in range(3):
         	plt.plot(self.time_save, self.xyz_save[:,i], label = labels[i])
+        
         plt.legend()
         plt.grid()
 

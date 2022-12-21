@@ -89,8 +89,8 @@ try {
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
 
-        for (int i=0; i<3; i++){
-            msg_to_send.xyz[i] = state.O_T_EE[i+12];
+        for (int i=0; i<16; i++){
+            msg_to_send.pose[i] = state.O_T_EE_c[i];
         }
 
         msg_to_send.robot_enabled = true;
