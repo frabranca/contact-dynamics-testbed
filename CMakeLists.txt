@@ -30,6 +30,9 @@ add_executable(position_control
 
 add_executable(pose_motion
 	src/utils/generate_cartesian_pose_motion.cpp)
+
+add_executable(time_measure
+	src/utils/time_measure.cpp)
 	
 target_link_libraries(torque_control
 	Franka::Franka
@@ -51,7 +54,11 @@ target_link_libraries(torque_position_control
 
 target_link_libraries(pose_motion
 	Franka::Franka
-	lcm)	
+	lcm)
+	
+target_link_libraries(time_measure
+	Franka::Franka
+	lcm)
 target_link_libraries(position_control
 	Franka::Franka
 	lcm)
