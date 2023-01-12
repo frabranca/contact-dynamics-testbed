@@ -172,7 +172,6 @@ class Controller:
             plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i+1))
         plt.legend()
         plt.grid()
-        
         plt.show()
     
     def write_output(self):
