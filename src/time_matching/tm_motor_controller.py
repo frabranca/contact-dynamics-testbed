@@ -1,9 +1,9 @@
 import time
+import lcm
 import numpy as np
 from motor_driver.canmotorlib import CanMotorController
 import matplotlib.pyplot as plt
-from robot_messages.frankalcm import motor_command
-import lcm
+from robot_messages.motorlcm import motor_command
 
 class motor_controller:
     def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):

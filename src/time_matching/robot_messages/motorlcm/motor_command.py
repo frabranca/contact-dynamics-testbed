@@ -9,17 +9,15 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import motorlcm.bool
-
 class motor_command(object):
     __slots__ = ["motor_enable"]
 
-    __typenames__ = ["motorlcm.bool"]
+    __typenames__ = ["boolean"]
 
     __dimensions__ = [None]
 
     def __init__(self):
-        self.motor_enable = motorlcm.bool()
+        self.motor_enable = False
 
     def encode(self):
         buf = BytesIO()
@@ -28,8 +26,7 @@ class motor_command(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.motor_enable._get_packed_fingerprint() == motorlcm.bool._get_packed_fingerprint()
-        self.motor_enable._encode_one(buf)
+        buf.write(struct.pack(">b", self.motor_enable))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -43,15 +40,14 @@ class motor_command(object):
 
     def _decode_one(buf):
         self = motor_command()
-        self.motor_enable = motorlcm.bool._decode_one(buf)
+        self.motor_enable = bool(struct.unpack('b', buf.read(1))[0])
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if motor_command in parents: return 0
-        newparents = parents + [motor_command]
-        tmphash = (0xf3aa78c3beaa8c49+ motorlcm.bool._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xb5e57d0c17f3aa60) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

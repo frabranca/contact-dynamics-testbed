@@ -2,6 +2,6 @@
 /src/motor_messages/motorlcm
 /build
 /src/extra_stuff
-/src/time_matching_robot_messages_frankalcm
-/src/time_matching_robot_messages_motorlcm
+/src/time_matching/robot_messages/frankalcm
+/src/time_matching/robot_messages/motorlcm
 

@@ -9,7 +9,6 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#include "frankalcm/bool.hpp"
 
 namespace frankalcm
 {
@@ -17,7 +16,7 @@ namespace frankalcm
 class robot_command
 {
     public:
-        frankalcm::bool robot_enable;
+        int8_t     robot_enable;
 
     public:
         /**
@@ -115,7 +114,7 @@ int robot_command::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = this->robot_enable._encodeNoHash(buf, offset + pos, maxlen - pos);
+    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->robot_enable, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -125,7 +124,7 @@ int robot_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = this->robot_enable._decodeNoHash(buf, offset + pos, maxlen - pos);
+    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->robot_enable, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -134,21 +133,13 @@ int robot_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 int robot_command::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += this->robot_enable._getEncodedSizeNoHash();
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t robot_command::_computeHash(const __lcm_hash_ptr *p)
+uint64_t robot_command::_computeHash(const __lcm_hash_ptr *)
 {
-    const __lcm_hash_ptr *fp;
-    for(fp = p; fp != NULL; fp = fp->parent)
-        if(fp->v == robot_command::getHash)
-            return 0;
-    const __lcm_hash_ptr cp = { p, robot_command::getHash };
-
-    uint64_t hash = 0xf3aa78b9bece8c45LL +
-         frankalcm::bool::_computeHash(&cp);
-
+    uint64_t hash = 0xb5e57d20183baa68LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

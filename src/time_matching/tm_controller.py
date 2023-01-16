@@ -2,30 +2,17 @@ import lcm
 import time
 import matplotlib.pyplot as plt
 import numpy as np
-from robot_messages.frankalcm import robot_command, gripper_command, motor_command
+from robot_messages.frankalcm import robot_command, gripper_command
+from robot_messages.motorlcm import motor_command
 
 class Controller:
-    def __init__(self, rst_channel, rcm_channel, gst_channel, gcm_channel, mst_channel, save_output=False, plot_data=False):
+    def __init__(self, rcm_channel, gcm_channel, mcm_channel):
+        self.rcm_channel = rcm_channel
+        self.gcm_channel = gcm_channel
+        self.mcm_channel = mcm_channel
+
+        self.lc = lcm.LCM()
         self.control_loop()
-        # initiate state variables as zeros
-
-        # robot states
-
-        # gripper states
-        
-        # motor states
-        
-        # useful booleans
-        
-        # lists to save output
-        
-        # define lcm channels
-        
-        # subscribe to channels
-        
-        # calculate trajectory
-        
-        # actions
         
     def message(self, string):
         print("controller.py: " + string)
@@ -57,7 +44,7 @@ class Controller:
                 
                 rcm_sent = True
             
-            if (time.time-start) >= motor_time and mcm_sent == False:
+            if (time.time()-start) >= motor_time and mcm_sent == False:
                 mcm = motor_command()
                 mcm.motor_enable = True
                 self.lc.publish(self.mcm_channel, mcm.encode())
@@ -65,8 +52,6 @@ class Controller:
                 mcm_sent = True
     
 if __name__ == "__main__":
-    controller = Controller("ROBOT STATE", 
-                            "ROBOT COMMAND", 
-                            "GRIPPER STATE", 
+    controller = Controller("ROBOT COMMAND", 
                             "GRIPPER COMMAND", 
-                            "MOTOR_STATE")
+                            "MOTOR_COMMAND")

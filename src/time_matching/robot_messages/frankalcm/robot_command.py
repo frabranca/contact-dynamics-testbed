@@ -9,17 +9,15 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import frankalcm.bool
-
 class robot_command(object):
     __slots__ = ["robot_enable"]
 
-    __typenames__ = ["frankalcm.bool"]
+    __typenames__ = ["boolean"]
 
     __dimensions__ = [None]
 
     def __init__(self):
-        self.robot_enable = frankalcm.bool()
+        self.robot_enable = False
 
     def encode(self):
         buf = BytesIO()
@@ -28,8 +26,7 @@ class robot_command(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.robot_enable._get_packed_fingerprint() == frankalcm.bool._get_packed_fingerprint()
-        self.robot_enable._encode_one(buf)
+        buf.write(struct.pack(">b", self.robot_enable))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -43,15 +40,14 @@ class robot_command(object):
 
     def _decode_one(buf):
         self = robot_command()
-        self.robot_enable = frankalcm.bool._decode_one(buf)
+        self.robot_enable = bool(struct.unpack('b', buf.read(1))[0])
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if robot_command in parents: return 0
-        newparents = parents + [robot_command]
-        tmphash = (0xf3aa78b9bece8c45+ frankalcm.bool._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xb5e57d20183baa68) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

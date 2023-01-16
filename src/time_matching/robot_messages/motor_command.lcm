@@ -2,5 +2,5 @@ package motorlcm;
 
 struct motor_command
 {
-   bool motor_enable;
+   boolean motor_enable;
 }

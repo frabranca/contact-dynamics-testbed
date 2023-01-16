@@ -9,7 +9,6 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#include "motorlcm/bool.hpp"
 
 namespace motorlcm
 {
@@ -17,7 +16,7 @@ namespace motorlcm
 class motor_command
 {
     public:
-        motorlcm::bool motor_enable;
+        int8_t     motor_enable;
 
     public:
         /**
@@ -115,7 +114,7 @@ int motor_command::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = this->motor_enable._encodeNoHash(buf, offset + pos, maxlen - pos);
+    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->motor_enable, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -125,7 +124,7 @@ int motor_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = this->motor_enable._decodeNoHash(buf, offset + pos, maxlen - pos);
+    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->motor_enable, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -134,21 +133,13 @@ int motor_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 int motor_command::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += this->motor_enable._getEncodedSizeNoHash();
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t motor_command::_computeHash(const __lcm_hash_ptr *p)
+uint64_t motor_command::_computeHash(const __lcm_hash_ptr *)
 {
-    const __lcm_hash_ptr *fp;
-    for(fp = p; fp != NULL; fp = fp->parent)
-        if(fp->v == motor_command::getHash)
-            return 0;
-    const __lcm_hash_ptr cp = { p, motor_command::getHash };
-
-    uint64_t hash = 0xf3aa78c3beaa8c49LL +
-         motorlcm::bool::_computeHash(&cp);
-
+    uint64_t hash = 0xb5e57d0c17f3aa60LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

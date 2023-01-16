@@ -9,7 +9,6 @@
 
 #include <lcm/lcm_coretypes.h>
 
-#include "frankalcm/bool.hpp"
 
 namespace frankalcm
 {
@@ -17,7 +16,7 @@ namespace frankalcm
 class gripper_command
 {
     public:
-        frankalcm::bool gripper_enable;
+        int8_t     gripper_enable;
 
     public:
         /**
@@ -115,7 +114,7 @@ int gripper_command::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = this->gripper_enable._encodeNoHash(buf, offset + pos, maxlen - pos);
+    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->gripper_enable, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -125,7 +124,7 @@ int gripper_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = this->gripper_enable._decodeNoHash(buf, offset + pos, maxlen - pos);
+    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->gripper_enable, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
     return pos;
@@ -134,21 +133,13 @@ int gripper_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 int gripper_command::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += this->gripper_enable._getEncodedSizeNoHash();
+    enc_size += __boolean_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
-uint64_t gripper_command::_computeHash(const __lcm_hash_ptr *p)
+uint64_t gripper_command::_computeHash(const __lcm_hash_ptr *)
 {
-    const __lcm_hash_ptr *fp;
-    for(fp = p; fp != NULL; fp = fp->parent)
-        if(fp->v == gripper_command::getHash)
-            return 0;
-    const __lcm_hash_ptr cp = { p, gripper_command::getHash };
-
-    uint64_t hash = 0x7c345334744740c4LL +
-         frankalcm::bool::_computeHash(&cp);
-
+    uint64_t hash = 0xa527ea2ab2101098LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

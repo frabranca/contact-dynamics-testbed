@@ -9,17 +9,15 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import frankalcm.bool
-
 class gripper_command(object):
     __slots__ = ["gripper_enable"]
 
-    __typenames__ = ["frankalcm.bool"]
+    __typenames__ = ["boolean"]
 
     __dimensions__ = [None]
 
     def __init__(self):
-        self.gripper_enable = frankalcm.bool()
+        self.gripper_enable = False
 
     def encode(self):
         buf = BytesIO()
@@ -28,8 +26,7 @@ class gripper_command(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        assert self.gripper_enable._get_packed_fingerprint() == frankalcm.bool._get_packed_fingerprint()
-        self.gripper_enable._encode_one(buf)
+        buf.write(struct.pack(">b", self.gripper_enable))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -43,15 +40,14 @@ class gripper_command(object):
 
     def _decode_one(buf):
         self = gripper_command()
-        self.gripper_enable = frankalcm.bool._decode_one(buf)
+        self.gripper_enable = bool(struct.unpack('b', buf.read(1))[0])
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if gripper_command in parents: return 0
-        newparents = parents + [gripper_command]
-        tmphash = (0x7c345334744740c4+ frankalcm.bool._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xa527ea2ab2101098) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

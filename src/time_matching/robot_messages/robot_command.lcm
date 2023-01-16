@@ -2,7 +2,7 @@ package frankalcm;
 
 struct robot_command
 { 
-    bool robot_enable;
+    boolean robot_enable;
 }
 
 
