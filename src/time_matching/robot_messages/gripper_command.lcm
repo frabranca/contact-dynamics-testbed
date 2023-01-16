@@ -1,0 +1,6 @@
+package frankalcm;
+
+struct gripper_command
+{
+   bool gripper_enable;
+}

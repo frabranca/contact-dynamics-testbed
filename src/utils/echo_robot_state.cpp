@@ -13,9 +13,7 @@
 int main(int argc, char** argv) {
 
   try {
-    franka::Robot robot("192.168.131.40");
-    franka::RobotState robot_state = robot.readOnce();
-    
+    franka::Robot robot("192.168.131.40");    
     std::cout << "Transformation Matrix" << std::endl;
     for (int i=0; i<4; i++){
             std::cout << robot_state.O_T_EE[i] << ", " <<

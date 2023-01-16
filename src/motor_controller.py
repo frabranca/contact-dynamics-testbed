@@ -30,11 +30,11 @@ class motor_controller:
         cur_f = []
 
         while (time.time() - start) < self.t:
-            if (time.time() - start) >= 4:
-                pos, vel, cur = self.motor.send_rad_command(0, 0, 0, 0, 0)
-                self.motor.send_rad_command(0, 0, 0, 0, 0)
+            if (time.time() - start) >= 7.:
+                pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)
+                # self.motor.send_rad_command(0, 0, 0, 0, 0)
             else:
-                pos, vel, cur = self.motor.send_deg_command(10, self.velocity, 0, 5, 0)
+                pos, vel, cur = self.motor.send_deg_command(0, self.velocity, 0, 5, 2)
                 #pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)
             # filter
             filter = 50
@@ -91,9 +91,14 @@ class motor_controller:
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 1
-    motor_controller(can_port, motor_id, 10, 90, plot=True, communication=False)
+    motor_controller(can_port, motor_id, 14, 60, plot=True, communication=False)
     # motor = CanMotorController(can_port, motor_id, motor_type="AK80_9_V1p1")
+
+    # start = time.time()
     # motor.enable_motor()
-    # motor.send_deg_command(10, 0, 0, 5, 0)
-    # time.sleep(5)
+    # while time.time()-start < 2.:
+    #     # pos, vel, cur = motor.send_deg_command(0, 40, 0, 5, 0)
+    #     pos, vel, cur = motor.send_deg_command(0, 0, 0, 0, 0)
+    #     print(np.cos(np.radians(pos)), vel, cur)
+    
     # motor.disable_motor()

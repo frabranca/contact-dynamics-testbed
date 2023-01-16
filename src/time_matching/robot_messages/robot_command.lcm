@@ -1,0 +1,8 @@
+package frankalcm;
+
+struct robot_command
+{ 
+    bool robot_enable;
+}
+
+
