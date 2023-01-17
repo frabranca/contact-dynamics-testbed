@@ -79,28 +79,28 @@ class Controller:
 
         while (time.time()-start) <= 15.:
             self.lc.handle()
+            gcm = gripper_command()
+            rcm = robot_command()
+            mcm = motor_command()
+
             if (time.time()-start) >= gripper_time and gcm_sent == False:
-                gcm = gripper_command()
                 gcm.gripper_enable = True
                 self.lc.publish(self.gcm_channel, gcm.encode())
 
                 gcm_sent = True
             
             if (time.time()-start) >= robot_time and rcm_sent == False:
-                rcm = robot_command()
                 rcm.robot_enable = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 
                 rcm_sent = True
             
             if (time.time()-start) >= motor_time and mcm_sent == False:
-                mcm = motor_command()
                 mcm.motor_enable = True
                 self.lc.publish(self.mcm_channel, mcm.encode())
 
                 mcm_sent = True
-            
-            
+                  
             if self.save_data:
                 self.time_save.append(time.time()-start)
                 self.q_save.append(self.q)

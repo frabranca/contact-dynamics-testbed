@@ -43,6 +43,9 @@ add_executable(tm_franka
 add_executable(tm_gripper
 	src/time_matching/tm_gripper.cpp)
 	
+add_executable(tm_vel_control
+	src/time_matching/tm_vel_control.cpp)
+
 target_link_libraries(torque_control
 	Franka::Franka
 	lcm)
@@ -81,5 +84,9 @@ target_link_libraries(tm_franka
 	lcm)
 
 target_link_libraries(tm_gripper
+	Franka::Franka
+	lcm)
+	
+target_link_libraries(tm_vel_control
 	Franka::Franka
 	lcm)

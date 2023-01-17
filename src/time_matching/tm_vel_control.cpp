@@ -63,17 +63,31 @@ try {
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, 
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
-        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, 
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, 
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Start real-time control loop.
     std::array<double, 7> q_grasp = {{2.24287, -0.0773729, -2.89707, -2.27973, -1.33621, 1.38334, 1.63835}};
-    MotionGenerator motion_grasp(0.5, q_grasp);
+
     lcm.handle();
     if (rcm_struct.robot_enable == true) {
-            robot.control(motion_grasp);}
+
+            double time = 0.0;
+            robot.control([&](const franka::RobotState&,
+                             franka::Duration period) -> franka::CartesianVelocities {
+            time += period.toSec();
+
+            franka::CartesianVelocities output = {{-0.44815, 0.0176222, -0.00541, 0.00872, 0.00125, 0.03169, -0.00558 }};
+            if (time >= 1.0) {
+                std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+                return franka::MotionFinished(output);
+      }
+      return output;
+    });
+            
+            }
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;
