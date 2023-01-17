@@ -8,7 +8,7 @@
 
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
-#include "robot_messages/frankalcm/robot_command.hpp"
+#include "robot_messages/frankalcm/robot_state.hpp"
 
 // define struct to store received commands from controller
 
@@ -20,7 +20,7 @@ try {
     // Connect to robot.
     franka::Robot robot("192.168.131.40");
     while (true){
-        const franka::RobotState& state;
+        const franka::RobotState& state = robot.readOnce();;
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
             msg_to_send.q_d[i] = state.q_d[i];

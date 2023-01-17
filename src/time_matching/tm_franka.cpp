@@ -9,6 +9,8 @@
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
 #include "robot_messages/frankalcm/robot_command.hpp"
+#include "robot_messages/frankalcm/robot_state.hpp"
+
 
 // define struct to store received commands from controller
 struct command_received{
@@ -37,6 +39,7 @@ void message(const char* input){
 int main(int argc, char** argv) {
 
   lcm::LCM lcm;
+  frankalcm::robot_state msg_to_send;
 
   Handler handlerObject;
   lcm.subscribe("ROBOT COMMAND", &Handler::handleMessage, &handlerObject);

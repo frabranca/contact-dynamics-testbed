@@ -24,6 +24,8 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
 
+	# robot save lists
+        self.time_save = []
         self.q_save = []
         self.q_d_save = []
         self.dq_save = []
@@ -39,6 +41,7 @@ class Controller:
         self.control_loop()
 
         self.lc.unsubscribe(self.robot_sub)
+        self.plot()
         
     def message(self, string):
         print("controller.py: " + string)
@@ -53,6 +56,10 @@ class Controller:
         self.tau_J         = rst.tau_J
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
+    
+    def plot(self):
+        plt.plot(self.time_save, self.q_save)
+        plt.show()
         
     def control_loop(self):
         start = time.time()
@@ -72,16 +79,6 @@ class Controller:
 
         while (time.time()-start) <= 15.:
             self.lc.handle()
-            if self.save_data:
-                self.q_save.append(self.q)
-                self.q_d_save.append(self.q_d)
-                self.dq_save.append(self.dq_save)
-                self.dq_d_save.append(self.dq_d)
-                self.ddq_d_save.append(self.ddq_d)
-                self.tau_J_save.append(self.tau_J)
-                self.tau_J_d_save.append(self.tau_J_d)
-                self.dtau_J_save.append(self.dtau_J_save)
-
             if (time.time()-start) >= gripper_time and gcm_sent == False:
                 gcm = gripper_command()
                 gcm.gripper_enable = True
@@ -102,6 +99,11 @@ class Controller:
                 self.lc.publish(self.mcm_channel, mcm.encode())
 
                 mcm_sent = True
+            
+            
+            if self.save_data:
+                self.time_save.append(time.time()-start)
+                self.q_save.append(self.q)
     
 if __name__ == "__main__":
     controller = Controller("ROBOT COMMAND", 
