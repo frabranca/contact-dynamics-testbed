@@ -25,8 +25,13 @@ class Controller:
 
         satellite_time = 7.6541
         motor_time = 1.
-        robot_time = 1. + satellite_time - 0.73798
-        gripper_time = 1. + satellite_time - 1.460984
+        robot_time = 1. + satellite_time - 1.#1.35439
+        gripper_time = 1. + satellite_time - 0.5# - 0.6523
+        
+        #satellite_time = 7.6541
+        #motor_time = 1.
+        #robot_time = 1. + satellite_time - 0.6#1.35439
+        #gripper_time = 1. + satellite_time - 0.5# - 0.6523
 
         while (time.time()-start) <= 15.:
 

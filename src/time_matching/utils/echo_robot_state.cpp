@@ -16,6 +16,7 @@ int main(int argc, char** argv) {
     franka::Robot robot("192.168.131.40");    
     std::cout << "Transformation Matrix" << std::endl;
     const franka::RobotState robot_state = robot.readOnce();
+    
     for (int i=0; i<4; i++){
             std::cout << robot_state.O_T_EE[i] << ", " <<
             		  robot_state.O_T_EE[i+4] << ", " <<
@@ -31,11 +32,6 @@ int main(int argc, char** argv) {
             		  robot_state.O_T_EE_c[i+8] << ", " <<
             		  robot_state.O_T_EE_c[i+12] << " " << std::endl;
         }
-    std::cout << " " << std::endl;
-    std::cout << "x y z" << std::endl;
-    std::cout << robot_state.O_T_EE[12] << " ";
-    std::cout << robot_state.O_T_EE[13] << " ";
-    std::cout << robot_state.O_T_EE[14] << " ";
     
     std::cout << " " << std::endl;
     std::cout << "Joint Angles" << std::endl;

@@ -6,14 +6,13 @@ import matplotlib.pyplot as plt
 from robot_messages.motorlcm import motor_command
 
 class motor_controller:
-    def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_9_V1p1", plot=False, channel = "MOTOR_STATE", communication=True):
+    def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_9_V1p1", channel = "MOTOR_COMMAND"):
         self.t = t
         self.velocity = velocity
-        self.plot = plot
         self.channel = channel
-        self.communication = communication
 
         self.lc = lcm.LCM()
+        self.lc.subscribe(self.channel, self.motor_handler)
         self.motor = CanMotorController(can_port, motor_id, motor_type=motor_type)
         self.motor.enable_motor()
 
@@ -33,8 +32,12 @@ class motor_controller:
         
         print("Disabling Motors...")
         self.motor.disable_motor()
+    
+    def motor_handler(self, channel, data):
+        mcm = motor_command.decode(data)
+        self.motor_enable = mcm.motor_enable
 
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 1
-    motor_controller(can_port, motor_id, 14, 60, plot=True, communication=False)
+    motor_controller(can_port, motor_id, 14, 60)

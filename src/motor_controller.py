@@ -91,14 +91,14 @@ class motor_controller:
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 1
-    motor_controller(can_port, motor_id, 14, 60, plot=True, communication=False)
-    # motor = CanMotorController(can_port, motor_id, motor_type="AK80_9_V1p1")
+    # motor_controller(can_port, motor_id, 14, 60, plot=True, communication=False)
+    motor = CanMotorController(can_port, motor_id, motor_type="AK80_9_V1p1")
 
-    # start = time.time()
-    # motor.enable_motor()
-    # while time.time()-start < 2.:
-    #     # pos, vel, cur = motor.send_deg_command(0, 40, 0, 5, 0)
-    #     pos, vel, cur = motor.send_deg_command(0, 0, 0, 0, 0)
-    #     print(np.cos(np.radians(pos)), vel, cur)
+    start = time.time()
+    motor.enable_motor()
+    while time.time()-start < 2.:
+        # pos, vel, cur = motor.send_deg_command(0, 40, 0, 5, 0)
+        pos, vel, cur = motor.send_deg_command(0, 0, 0, 0, 0)
+        print(np.cos(np.radians(pos)))
     
-    # motor.disable_motor()
+    motor.disable_motor()
