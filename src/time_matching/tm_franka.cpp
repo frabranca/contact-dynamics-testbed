@@ -50,7 +50,7 @@ try {
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_goal = {{2.69102, -0.0949951, -2.89166, -2.28845, -1.33746, 1.35165, 1.64393}};
+    std::array<double, 7> q_goal = {{0.0, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);
@@ -69,7 +69,7 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Start real-time control loop.
-    std::array<double, 7> q_grasp = {{2.24287, -0.0773729, -2.89707, -2.27973, -1.33621, 1.38334, 1.63835}};
+    std::array<double, 7> q_grasp = {{-0.48962, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
     MotionGenerator motion_grasp(0.5, q_grasp);
     lcm.handle();
     if (rcm_struct.robot_enable == true) {

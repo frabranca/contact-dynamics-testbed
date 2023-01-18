@@ -50,7 +50,7 @@ try {
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_goal = {{2.69102, -0.0949951, -2.89166, -2.28845, -1.33746, 1.35165, 1.64393}};
+    std::array<double, 7> q_goal = {{0.0, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);
@@ -69,20 +69,27 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Start real-time control loop.
-    std::array<double, 7> q_grasp = {{2.24287, -0.0773729, -2.89707, -2.27973, -1.33621, 1.38334, 1.63835}};
+    std::array<double, 7> q_grasp = {{-0.48962, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
 
     lcm.handle();
     if (rcm_struct.robot_enable == true) {
 
             double time = 0.0;
-            robot.control([&](const franka::RobotState&,
-                             franka::Duration period) -> franka::CartesianVelocities {
+
+            robot.control([&](const franka::RobotState& state,
+                             franka::Duration period) -> franka::JointVelocities {
             time += period.toSec();
 
-            franka::CartesianVelocities output = {{-0.44815, 0.0176222, -0.00541, 0.00872, 0.00125, 0.03169, -0.00558 }};
-            if (time >= 1.0) {
+            franka::JointVelocities output = {{-0.48962*time, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+            franka::JointVelocities zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+            for (int i=0; i<7; i++){
+            	msg_to_send.q[i] = state.q[i];
+            }
+            lcm.publish("ROBOT STATE", &msg_to_send);
+            
+            if (time >= 1.) {
                 std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-                return franka::MotionFinished(output);
+                return franka::MotionFinished(zero);
       }
       return output;
     });

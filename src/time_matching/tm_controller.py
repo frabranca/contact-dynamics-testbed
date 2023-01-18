@@ -78,10 +78,13 @@ class Controller:
         #gripper_time = 1. + satellite_time - 0.5# - 0.6523
 
         while (time.time()-start) <= 15.:
-            self.lc.handle()
+
             gcm = gripper_command()
             rcm = robot_command()
             mcm = motor_command()
+            
+            if rcm_sent == True:
+            	self.lc.handle()
 
             if (time.time()-start) >= gripper_time and gcm_sent == False:
                 gcm.gripper_enable = True
