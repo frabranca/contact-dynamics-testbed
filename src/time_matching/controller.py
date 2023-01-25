@@ -1,6 +1,6 @@
 import lcm
-from robot_messages.frankalcm import robot_state, robot_command, gripper_command
-
+from robot_messages.frankalcm import robot_state, robot_command, gripper_command, gripper_state
+from robot_messages.motorlcm import motor_command
 import time
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,7 +19,6 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.robot_enabled = False
-        self.pose = [0,0,0]
 
         # gripper states
         self.width = 0
@@ -54,10 +53,6 @@ class Controller:
         self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
         self.motor_sub   = self.lc.subscribe(self.mst_channel, self.motor_handler)
 
-        # calculate trajectory
-        self.x_trajectory = self.trajectory()[0]
-        self.z_trajectory = self.trajectory()[1]
-
         # actions
         self.lc.handle()
         if self.robot_enabled == True:
@@ -75,15 +70,6 @@ class Controller:
         if save_output:
             self.write_output()
 
-    def trajectory(self):
-        radius = 0.3
-        t = np.arange(0,10,0.001)
-        angle = np.pi/4 * (1 - np.cos(np.pi * t/2.0))
-        x = radius * np.sin(angle)
-        z = radius * (np.cos(angle) - 1)
-        return x,z
-
-
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
         self.q             = rst.q
@@ -95,48 +81,64 @@ class Controller:
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
         self.robot_enabled = rst.robot_enabled
-        self.pose          = rst.pose
     
     def gripper_handler(self, channel, data):
         gst = gripper_state.decode(data)
         self.width           = gst.width 
         self.gripper_enabled = gst.gripper_enabled
-
-    def motor_handler(self, channel, data):
-        mst = motor_state.decode(data)
-        self.motor_xmf = mst.motor_xmf
-        self.motor_ymf = mst.motor_ymf
-        self.motor_vel = mst.motor_vel
-        self.motor_cur = mst.motor_cur
-        self.message("motor data received")
     
     def message(self, string):
         print("controller.py: " + string)
 
     def control_loop(self):
-        start_time = time.time()
+        start = time.time()
         loop_closed = False
         self.message("loop started")
+
+        gcm_sent = False
+        rcm_sent = False
+        mcm_sent = False
+
+        satellite_time = 7.6541
+        motor_time = 1.
+        robot_time = 1. + satellite_time - 1.#1.35439
+        gripper_time = 1. + satellite_time - 0.5# - 0.6523
 
         while not loop_closed:
             self.lc.handle()
             rcm = robot_command()
+            gcm = gripper_command()
+            mcm = motor_command()
 
             # control logic --------------------------------------------------
             #rcm.tau_J_d = self.tau_J_d
+            t = time.time() - start
 
-            rcm.pose[0] = self.pose[0]
-            rcm.pose[1] = self.pose[1]
-            rcm.pose[2] = self.pose[2]
-
-            #print(rcm.pose[0], rcm.pose[1], rcm.pose[2])
             #-----------------------------------------------------------------
             
             self.lc.publish(self.rcm_channel, rcm.encode())
 
+            if (time.time()-start) >= gripper_time and gcm_sent == False:
+                gcm.gripper_enable = True
+                self.lc.publish(self.gcm_channel, gcm.encode())
+
+                gcm_sent = True
+            
+            if (time.time()-start) >= robot_time and rcm_sent == False:
+                t_robot = t - robot_time
+                rcm.q_d = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
+                self.lc.publish(self.rcm_channel, rcm.encode())
+                
+                #rcm_sent = True
+            
+            if (time.time()-start) >= motor_time and mcm_sent == False:
+                mcm.motor_enable = True
+                self.lc.publish(self.mcm_channel, mcm.encode())
+
+                mcm_sent = True
+        
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
-                self.xyz_save.append(self.xyz)
                 self.time_save.append(time.time() - start_time)
 
             if (time.time()-start_time) > 1.0 and self.gripper_moved == False:
