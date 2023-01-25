@@ -14,6 +14,7 @@
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> q_d;
+    bool loop_open_received;
     bool loop_closed_received;
 };
 
@@ -29,6 +30,8 @@ class Handler
                 const frankalcm::robot_command* msg_received){
               int i;
               rcm_struct.loop_closed_received = msg_received->loop_closed;
+              rcm_struct.loop_open_received = msg_received->loop_open;
+
               for (i=0; i<7; i++){
                 rcm_struct.q_d[i] = msg_received->q_d[i];}
               }
@@ -101,9 +104,10 @@ try {
     };
 
     // Start real-time control loop.
-    msg_to_send.robot_enable = true;
-    lcm.publish("ROBOT STATE", &msg_to_send);
-    robot.control(velocity_control);
+    lcm.handle();
+    if (rcm_struct.loop_open_received == true){
+        robot.control(velocity_control);
+    }
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;

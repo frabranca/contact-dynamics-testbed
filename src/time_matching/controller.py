@@ -50,8 +50,8 @@ class Controller:
         # subscribe to channels
         self.lc = lcm.LCM()
         self.robot_sub   = self.lc.subscribe(self.rst_channel, self.robot_handler)
-        self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
-        self.motor_sub   = self.lc.subscribe(self.mst_channel, self.motor_handler)
+        # self.gripper_sub = self.lc.subscribe(self.gst_channel, self.gripper_handler)
+        # self.motor_sub   = self.lc.subscribe(self.mst_channel, self.motor_handler)
 
         # actions
         self.lc.handle()
@@ -59,12 +59,11 @@ class Controller:
             self.control_loop()
         
         self.lc.unsubscribe(self.robot_sub)
-        self.lc.unsubscribe(self.gripper_sub)
-        self.lc.unsubscribe(self.motor_sub)
+        # self.lc.unsubscribe(self.gripper_sub)
+        # self.lc.unsubscribe(self.motor_sub)
         
         if self.plot_data:
             self.tau_J_save = np.array(self.tau_J_save)
-            self.xyz_save = np.array(self.xyz_save)
             self.plot()
 
         if save_output:
@@ -81,11 +80,6 @@ class Controller:
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
         self.robot_enabled = rst.robot_enabled
-    
-    def gripper_handler(self, channel, data):
-        gst = gripper_state.decode(data)
-        self.width           = gst.width 
-        self.gripper_enabled = gst.gripper_enabled
     
     def message(self, string):
         print("controller.py: " + string)
@@ -116,8 +110,6 @@ class Controller:
 
             #-----------------------------------------------------------------
             
-            self.lc.publish(self.rcm_channel, rcm.encode())
-
             if (time.time()-start) >= gripper_time and gcm_sent == False:
                 gcm.gripper_enable = True
                 self.lc.publish(self.gcm_channel, gcm.encode())
@@ -126,7 +118,8 @@ class Controller:
             
             if (time.time()-start) >= robot_time and rcm_sent == False:
                 t_robot = t - robot_time
-                rcm.q_d = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
+                q_d1 = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
+                rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 
                 #rcm_sent = True

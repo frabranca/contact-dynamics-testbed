@@ -3,6 +3,7 @@ package frankalcm;
 struct robot_command
 { 
     double q_d[7];
+    boolean loop_open;
     boolean loop_closed;
 }
 
