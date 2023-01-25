@@ -37,17 +37,14 @@ add_executable(time_measure
 add_executable(tm_read_data
 	src/time_matching/tm_read_data.cpp)
 
-add_executable(tm_franka
-	src/time_matching/tm_franka.cpp)	
-
 add_executable(tm_gripper
 	src/time_matching/tm_gripper.cpp)
-	
-add_executable(tm_vel_control
-	src/time_matching/tm_vel_control.cpp)
 
 add_executable(velocity
 	src/utils/generate_joint_velocity_motion.cpp)
+
+add_executable(vel_control
+	src/time_matching/vel_control.cpp)
 
 target_link_libraries(torque_control
 	Franka::Franka
@@ -81,19 +78,15 @@ target_link_libraries(position_control
 target_link_libraries(tm_read_data
 	Franka::Franka
 	lcm)
-	
-target_link_libraries(tm_franka
-	Franka::Franka
-	lcm)
 
 target_link_libraries(tm_gripper
 	Franka::Franka
 	lcm)
-	
-target_link_libraries(tm_vel_control
+
+target_link_libraries(velocity
 	Franka::Franka
 	lcm)
 
-target_link_libraries(velocity
+target_link_libraries(vel_control
 	Franka::Franka
 	lcm)

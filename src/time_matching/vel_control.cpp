@@ -11,10 +11,10 @@
 #include "robot_messages/frankalcm/robot_command.hpp"
 #include "robot_messages/frankalcm/robot_state.hpp"
 
-
 // define struct to store received commands from controller
 struct command_received{
-    bool robot_enable;
+    std::array<double, 7> q_d;
+    bool loop_closed_received;
 };
 
 command_received rcm_struct;
@@ -28,8 +28,10 @@ class Handler
                 const std::string& chan, 
                 const frankalcm::robot_command* msg_received){
               int i;
-              rcm_struct.robot_enable = msg_received->robot_enable;}
-
+              rcm_struct.loop_closed_received = msg_received->loop_closed;
+              for (i=0; i<7; i++){
+                rcm_struct.q_d[i] = msg_received->q_d[i];}
+              }
 };
 
 void message(const char* input){
@@ -50,7 +52,7 @@ try {
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_goal = {{0.0, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
+    std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);
@@ -68,12 +70,40 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, 
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
+    // Define callback for the joint torque control loop.
+    franka::JointVelocities zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+
+    std::function<franka::JointVelocities(const franka::RobotState&, franka::Duration period)>
+        velocity_control =
+            [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
+            
+        for (int i=0; i<7; i++){
+            msg_to_send.q[i] = state.q[i];
+            msg_to_send.q_d[i] = state.q_d[i];
+            msg_to_send.dq[i] = state.dq[i];
+            msg_to_send.dq_d[i] = state.dq_d[i];
+            msg_to_send.ddq_d[i] = state.ddq_d[i];
+            msg_to_send.tau_J[i] = state.tau_J[i];
+            msg_to_send.tau_J_d[i] = state.tau_J_d[i];
+            msg_to_send.dtau_J[i] = state.dtau_J[i];
+        }
+
+        msg_to_send.robot_enable = true;
+
+        lcm.publish("ROBOT STATE", &msg_to_send);
+        lcm.handle();
+
+        if (rcm_struct.loop_closed_received == true) {
+            message("Loop closed");
+            return zero;}
+
+    return rcm_struct.q_d;
+    };
+
     // Start real-time control loop.
-    std::array<double, 7> q_grasp = {{-0.48962, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
-    MotionGenerator motion_grasp(0.5, q_grasp);
-    lcm.handle();
-    if (rcm_struct.robot_enable == true) {
-            robot.control(motion_grasp);}
+    msg_to_send.robot_enable = true;
+    lcm.publish("ROBOT STATE", &msg_to_send);
+    robot.control(velocity_control);
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;
