@@ -1,5 +1,5 @@
 import lcm
-from robot_messages.frankalcm import robot_state, robot_command, gripper_command
+from robot_messages.frankalcm import robot_state, robot_command, gripper_command, gripper_state
 from robot_messages.motorlcm import motor_command
 import time
 import matplotlib.pyplot as plt
@@ -18,7 +18,7 @@ class Controller:
         self.tau_J = 0
         self.tau_J_d = 0
         self.dtau_J = 0
-        self.robot_enable = False
+        self.robot_enabled = False
 
         # gripper states
         self.width = 0
@@ -54,10 +54,7 @@ class Controller:
         # self.motor_sub   = self.lc.subscribe(self.mst_channel, self.motor_handler)
 
         # actions
-        rcm = robot_command()
-        rcm.loop_open = True
-        self.lc.publish(self.rcm_channel, rcm.encode())
-        
+
         self.control_loop()
         
         self.lc.unsubscribe(self.robot_sub)
@@ -81,7 +78,7 @@ class Controller:
         self.tau_J         = rst.tau_J
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
-        self.robot_enable = rst.robot_enable
+        self.robot_enabled = rst.robot_enabled
     
     def message(self, string):
         print("controller.py: " + string)
@@ -112,14 +109,15 @@ class Controller:
 
             #-----------------------------------------------------------------
             
-            # if (time.time()-start) >= gripper_time and gcm_sent == False:
-            #     gcm.gripper_enable = True
-            #     self.lc.publish(self.gcm_channel, gcm.encode())
+            if (time.time()-start) >= gripper_time and gcm_sent == False:
+                gcm.gripper_enable = True
+                self.lc.publish(self.gcm_channel, gcm.encode())
 
-            #     gcm_sent = True
+                gcm_sent = True
             
             if (time.time()-start) >= robot_time and rcm_sent == False:
-                print("command sent")
+
+                rcm.loop_open = True
                 t_robot = t - robot_time
                 q_d1 = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
                 rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
@@ -127,9 +125,9 @@ class Controller:
                 
                 #rcm_sent = True
             
-            # if (time.time()-start) >= motor_time and mcm_sent == False:
-            #     mcm.motor_enable = True
-            #     self.lc.publish(self.mcm_channel, mcm.encode())
+            if (time.time()-start) >= motor_time and mcm_sent == False:
+                mcm.motor_enable = True
+                self.lc.publish(self.mcm_channel, mcm.encode())
 
                 mcm_sent = True
         
@@ -137,9 +135,9 @@ class Controller:
                 self.tau_J_save.append(self.tau_J)
                 self.time_save.append(time.time() - start)
 
-            # if (time.time()-start) > 1.0 and self.gripper_moved == False:
-            #     self.gripper_moved = True
-            #     self.move_gripper(0.02, 10.0, 60.0)
+            if (time.time()-start) > 1.0 and self.gripper_moved == False:
+                self.gripper_moved = True
+                self.move_gripper(0.02, 10.0, 60.0)
             
             if (time.time()-start) > 10.0:
                 rcm.loop_closed = True
