@@ -94,18 +94,20 @@ try {
         msg_to_send.robot_enable = true;
 
         lcm.publish("ROBOT STATE", &msg_to_send);
-        lcm.handle();
+        std::cout << "state sent" << std::endl;
+        //lcm.handle();
 
         if (rcm_struct.loop_closed_received == true) {
             message("Loop closed");
             return zero;}
-
+    lcm.handle();
     return rcm_struct.q_d;
     };
 
     // Start real-time control loop.
     lcm.handle();
     if (rcm_struct.loop_open_received == true){
+    	std::cout << "open loop" << std::endl;
         robot.control(velocity_control);
     }
 
