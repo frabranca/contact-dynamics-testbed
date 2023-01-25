@@ -76,15 +76,11 @@ class Controller:
         #motor_time = 1.
         #robot_time = 1. + satellite_time - 0.6#1.35439
         #gripper_time = 1. + satellite_time - 0.5# - 0.6523
-
         while (time.time()-start) <= 15.:
 
             gcm = gripper_command()
             rcm = robot_command()
             mcm = motor_command()
-            
-            if rcm_sent == True:
-            	self.lc.handle()
 
             if (time.time()-start) >= gripper_time and gcm_sent == False:
                 gcm.gripper_enable = True
@@ -97,16 +93,22 @@ class Controller:
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 
                 rcm_sent = True
+                
+            if rcm_sent == True:
+                self.lc.handle()
+                if self.save_data:
+                    self.time_save.append(time.time()-start)
+                    self.q_save.append(self.q)
             
             if (time.time()-start) >= motor_time and mcm_sent == False:
                 mcm.motor_enable = True
                 self.lc.publish(self.mcm_channel, mcm.encode())
 
                 mcm_sent = True
-                  
-            if self.save_data:
-                self.time_save.append(time.time()-start)
-                self.q_save.append(self.q)
+        
+            #if self.save_data:
+                #self.time_save.append(time.time()-start)
+                #self.q_save.append(self.q)
     
 if __name__ == "__main__":
     controller = Controller("ROBOT COMMAND", 

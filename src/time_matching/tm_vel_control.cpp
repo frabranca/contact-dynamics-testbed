@@ -79,17 +79,21 @@ try {
             robot.control([&](const franka::RobotState& state,
                              franka::Duration period) -> franka::JointVelocities {
             time += period.toSec();
+            
+            double q1 = -0.5+0.5*std::cos(2*M_PI*time);
 
-            franka::JointVelocities output = {{-0.48962*time, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-            franka::JointVelocities zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+            franka::JointVelocities output = {{q1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+            std::cout << q1 << " ";
+            std::cout << state.q[0] << std::endl;
+
             for (int i=0; i<7; i++){
             	msg_to_send.q[i] = state.q[i];
             }
             lcm.publish("ROBOT STATE", &msg_to_send);
             
-            if (time >= 1.) {
+            if (time >= 1) {
                 std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-                return franka::MotionFinished(zero);
+                return franka::MotionFinished(output);
       }
       return output;
     });

@@ -46,6 +46,9 @@ add_executable(tm_gripper
 add_executable(tm_vel_control
 	src/time_matching/tm_vel_control.cpp)
 
+add_executable(velocity
+	src/utils/generate_joint_velocity_motion.cpp)
+
 target_link_libraries(torque_control
 	Franka::Franka
 	lcm)
@@ -88,5 +91,9 @@ target_link_libraries(tm_gripper
 	lcm)
 	
 target_link_libraries(tm_vel_control
+	Franka::Franka
+	lcm)
+
+target_link_libraries(velocity
 	Franka::Franka
 	lcm)
