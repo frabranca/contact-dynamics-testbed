@@ -1,6 +1,6 @@
 import lcm
-from robot_messages.frankalcm import robot_state, robot_command, gripper_command, gripper_state
-from motor_messages.motorlcm import motor_state
+from robot_messages.frankalcm import robot_state, robot_command, gripper_command
+
 import time
 import matplotlib.pyplot as plt
 import numpy as np

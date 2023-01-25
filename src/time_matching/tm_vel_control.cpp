@@ -93,7 +93,7 @@ try {
             
             if (time >= 1) {
                 std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-                return franka::MotionFinished(output);
+                return {0., 0., 0., 0., 0., 0., 0.};
       }
       return output;
     });
