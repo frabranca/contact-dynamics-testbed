@@ -16,6 +16,7 @@ struct command_received{
     std::array<double, 7> q_d;
     bool loop_open_received;
     bool loop_closed_received;
+    bool motion_finished_received;
 };
 
 command_received rcm_struct;
@@ -31,6 +32,7 @@ class Handler
               int i;
               rcm_struct.loop_closed_received = msg_received->loop_closed;
               rcm_struct.loop_open_received = msg_received->loop_open;
+              rcm_struct.motion_finished_received = msg_received->motion_finished;
 
               for (i=0; i<7; i++){
                 rcm_struct.q_d[i] = msg_received->q_d[i];}
@@ -97,8 +99,8 @@ try {
         std::cout << "state sent" << std::endl;
         lcm.handle();
 
-        if (rcm_struct.loop_closed_received == true) {
-            message("Loop closed");
+        if (rcm_struct.motion_finished_received == true) {
+            message("Motion Finished");
             return zero;}
     lcm.handle();
     return rcm_struct.q_d;

@@ -121,10 +121,14 @@ class Controller:
                 t_robot = t - robot_time
                 q_d1 = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
                 rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
+                rcm.motion_finished = False
                 self.lc.publish(self.rcm_channel, rcm.encode())
+                
                 if t_robot >= 1.1:
                     motion_finished = True
-                
+                    rcm.motion_finished = True
+                    self.lc.publish(self.rcm_channel, rcm.encode())
+
                 #rcm_sent = True
             
             # if (time.time()-start) >= motor_time and mcm_sent == False:
