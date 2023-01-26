@@ -38,7 +38,8 @@ class Controller:
         self.save_output = save_output
         self.tau_J_save = []
         self.time_save = []
-        self.xyz_save = []
+        self.q_save = []
+        self.qd_save = []
 
         # define lcm channels
         self.rst_channel = rst_channel
@@ -98,7 +99,6 @@ class Controller:
         gripper_time = 1. + satellite_time - 0.5# - 0.6523
 
         while not loop_closed:
-            # self.lc.handle()
             rcm = robot_command()
             gcm = gripper_command()
             mcm = motor_command()
@@ -119,16 +119,16 @@ class Controller:
 
                 rcm.loop_open = True
                 t_robot = t - robot_time
-                q_d1 = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
+                q_d1 = -0.5 + 0.5*np.cos(np.pi * t_robot)
                 rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
                 rcm.motion_finished = False
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 
-                if t_robot >= 1.1:
-                    motion_finished = True
+                if t_robot >= 2.0:
                     rcm.motion_finished = True
+                    print("motion finished")
                     self.lc.publish(self.rcm_channel, rcm.encode())
-
+                    motion_finished = True
                 #rcm_sent = True
             
             # if (time.time()-start) >= motor_time and mcm_sent == False:
@@ -136,10 +136,12 @@ class Controller:
             #     self.lc.publish(self.mcm_channel, mcm.encode())
 
             #     mcm_sent = True
-        
+            #self.lc.handle()
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
                 self.time_save.append(time.time() - start)
+                self.q_save.append(self.q)
+                self.qd_save.append(self.q_d)
 
             # if (time.time()-start) > 1.0 and self.gripper_moved == False:
             #     self.gripper_moved = True
@@ -161,8 +163,9 @@ class Controller:
     
     def plot(self):
         plt.figure()
-        for i in range(7):
-            plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i+1))
+        plt.plot(self.time_save, self.q_save)
+        print(self.q_save)
+
         plt.legend()
         plt.grid()
         plt.show()
@@ -180,4 +183,4 @@ if __name__ == "__main__":
                             "ROBOT COMMAND", 
                             "GRIPPER STATE", 
                             "GRIPPER COMMAND", 
-                            "MOTOR_STATE", plot_data=True)
+                            "MOTOR_STATE")

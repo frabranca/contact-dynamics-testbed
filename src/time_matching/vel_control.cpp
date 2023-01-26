@@ -57,7 +57,7 @@ try {
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_goal = {{0.0, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
+    std::array<double, 7> q_goal = {{0.5, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);
@@ -96,14 +96,13 @@ try {
         msg_to_send.robot_enable = true;
 
         lcm.publish("ROBOT STATE", &msg_to_send);
-        std::cout << "state sent" << std::endl;
-        lcm.handle();
+        //lcm.handle();
 
-        if (rcm_struct.motion_finished_received == true) {
-            message("Motion Finished");
+        if (state.q[0] <= -0.49) {
             return zero;}
-    lcm.handle();
-    return rcm_struct.q_d;
+        else{
+            lcm.handle();
+            return rcm_struct.q_d;}
     };
 
     // Start real-time control loop.
