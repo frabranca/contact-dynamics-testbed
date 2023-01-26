@@ -1,5 +1,5 @@
 import lcm
-from robot_messages.frankalcm import robot_state, robot_command, gripper_command, gripper_state
+from robot_messages.frankalcm import robot_state, robot_command, gripper_command
 from robot_messages.motorlcm import motor_command
 import time
 import matplotlib.pyplot as plt
@@ -98,7 +98,7 @@ class Controller:
         gripper_time = 1. + satellite_time - 0.5# - 0.6523
 
         while not loop_closed:
-            self.lc.handle()
+            # self.lc.handle()
             rcm = robot_command()
             gcm = gripper_command()
             mcm = motor_command()
@@ -125,19 +125,19 @@ class Controller:
                 
                 #rcm_sent = True
             
-            if (time.time()-start) >= motor_time and mcm_sent == False:
-                mcm.motor_enable = True
-                self.lc.publish(self.mcm_channel, mcm.encode())
+            # if (time.time()-start) >= motor_time and mcm_sent == False:
+            #     mcm.motor_enable = True
+            #     self.lc.publish(self.mcm_channel, mcm.encode())
 
-                mcm_sent = True
+            #     mcm_sent = True
         
             if self.save_output:
                 self.tau_J_save.append(self.tau_J)
                 self.time_save.append(time.time() - start)
 
-            if (time.time()-start) > 1.0 and self.gripper_moved == False:
-                self.gripper_moved = True
-                self.move_gripper(0.02, 10.0, 60.0)
+            # if (time.time()-start) > 1.0 and self.gripper_moved == False:
+            #     self.gripper_moved = True
+            #     self.move_gripper(0.02, 10.0, 60.0)
             
             if (time.time()-start) > 10.0:
                 rcm.loop_closed = True
@@ -154,15 +154,6 @@ class Controller:
         self.message("gripper command sent")
     
     def plot(self):
-        labels = ("x","y","z")
-
-        plt.figure()
-        for i in range(3):
-        	plt.plot(self.time_save, self.xyz_save[:,i], label = labels[i])
-        
-        plt.legend()
-        plt.grid()
-
         plt.figure()
         for i in range(7):
             plt.plot(self.time_save, self.tau_J_save[:,i], label= "Joint " + str(i+1))
@@ -183,4 +174,4 @@ if __name__ == "__main__":
                             "ROBOT COMMAND", 
                             "GRIPPER STATE", 
                             "GRIPPER COMMAND", 
-                            "MOTOR_STATE")
+                            "MOTOR_STATE", plot_data=True)

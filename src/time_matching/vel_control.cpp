@@ -95,7 +95,7 @@ try {
 
         lcm.publish("ROBOT STATE", &msg_to_send);
         std::cout << "state sent" << std::endl;
-        //lcm.handle();
+        lcm.handle();
 
         if (rcm_struct.loop_closed_received == true) {
             message("Loop closed");
