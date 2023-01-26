@@ -89,7 +89,7 @@ class Controller:
         self.message("loop started")
 
         gcm_sent = False
-        rcm_sent = False
+        motion_finished = False
         mcm_sent = False
 
         satellite_time = 7.6541
@@ -115,13 +115,15 @@ class Controller:
 
                 gcm_sent = True
             
-            if (time.time()-start) >= robot_time and rcm_sent == False:
+            if (time.time()-start) >= robot_time and motion_finished == False:
 
                 rcm.loop_open = True
                 t_robot = t - robot_time
                 q_d1 = -0.5 + 0.5*np.cos(2 * np.pi * t_robot)
                 rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
                 self.lc.publish(self.rcm_channel, rcm.encode())
+                if t_robot >= 1.1:
+                    motion_finished = True
                 
                 #rcm_sent = True
             
