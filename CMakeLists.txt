@@ -9,7 +9,7 @@ find_package(lcm REQUIRED)
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
 )
-  
+
 add_executable(torque_control 
 	src/torque_control.cpp)
 
@@ -33,9 +33,6 @@ add_executable(pose_motion
 
 add_executable(time_measure
 	src/utils/time_measure.cpp)
-
-add_executable(tm_read_data
-	src/time_matching/tm_read_data.cpp)
 
 add_executable(tm_gripper
 	src/time_matching/tm_gripper.cpp)
@@ -72,10 +69,6 @@ target_link_libraries(time_measure
 	Franka::Franka
 	lcm)
 target_link_libraries(position_control
-	Franka::Franka
-	lcm)
-
-target_link_libraries(tm_read_data
 	Franka::Franka
 	lcm)
 

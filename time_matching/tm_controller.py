@@ -3,7 +3,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from robot_messages.frankalcm import robot_command, gripper_command, robot_state
-from robot_messages.motorlcm import motor_command
+from motor_messages.motorlcm import motor_command
 
 class Controller:
     def __init__(self, rcm_channel, gcm_channel, mcm_channel, rst_channel, save_data = True):
