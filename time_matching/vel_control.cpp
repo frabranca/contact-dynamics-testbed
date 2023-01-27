@@ -98,12 +98,12 @@ try {
         msg_to_send.robot_enable = true;
 
         lcm.publish("ROBOT STATE", &msg_to_send);
-        //lcm.handle();
+        lcm.handle();
 
         if (state.q[0] <= -0.49) {
             return zero;}
         else{
-            lcm.handle();
+            //lcm.handle();
             return rcm_struct.q_d;}
     };
 
@@ -114,7 +114,7 @@ try {
     //     robot.control(velocity_control);
     // }
     // Start real-time control loop.
-    msg_to_send.robot_enabled = true;
+    msg_to_send.robot_enable = true;
     lcm.publish("ROBOT STATE", &msg_to_send);
     robot.control(velocity_control);
 

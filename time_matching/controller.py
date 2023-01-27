@@ -41,7 +41,7 @@ class Controller:
 
         # actions
         self.lc.handle()
-        if self.robot_enabled == True:
+        if self.robot_enable == True:
             self.control_loop()
         
         self.lc.unsubscribe(self.robot_sub)
@@ -75,6 +75,8 @@ class Controller:
             # control logic --------------------------------------------------
             t = time.time() - start
             print(self.q[0])
+            rcm.q_d = np.array([0., 0., 0., 0., 0., 0., 0.])
+            self.lc.publish(self.rcm_channel, rcm.encode())
             
             if (time.time()-start) >= gripper_time and gripper_moved == False:
                 gcm.gripper_enable = True
@@ -82,7 +84,7 @@ class Controller:
                 gripper_moved = True
             
             if (time.time()-start) >= robot_time and motion_finished == False:
-                rcm.loop_open = True
+                # rcm.loop_open = True
                 t_robot = t - robot_time
                 q_d1 = -0.5 + 0.5*np.cos(np.pi * t_robot)
                 rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
@@ -120,8 +122,7 @@ class Controller:
         self.tau_J         = rst.tau_J
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
-        self.robot_enabled = rst.robot_enabled
-        self.pose          = rst.pose
+        self.robot_enable = rst.robot_enable
     
     def move_gripper(self, width, speed, force):
         gcm = gripper_command()

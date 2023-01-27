@@ -34,14 +34,11 @@ add_executable(pose_motion
 add_executable(time_measure
 	src/utils/time_measure.cpp)
 
-add_executable(tm_gripper
-	src/time_matching/tm_gripper.cpp)
-
 add_executable(velocity
 	src/utils/generate_joint_velocity_motion.cpp)
 
 add_executable(vel_control
-	src/time_matching/vel_control.cpp)
+	time_matching/vel_control.cpp)
 
 target_link_libraries(torque_control
 	Franka::Franka
@@ -69,10 +66,6 @@ target_link_libraries(time_measure
 	Franka::Franka
 	lcm)
 target_link_libraries(position_control
-	Franka::Franka
-	lcm)
-
-target_link_libraries(tm_gripper
 	Franka::Franka
 	lcm)
 
