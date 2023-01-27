@@ -24,12 +24,6 @@ class Controller:
         self.width = 0
         self.gripper_enabled = False
 
-        # motor states
-        self.motor_xmf = 0
-        self.motor_ymf = 0
-        self.motor_vel = 0
-        self.motor_cur = 0
-
         # define lcm channels
         self.rcm_channel = rcm_channel
         self.rst_channel = rst_channel
@@ -58,9 +52,6 @@ class Controller:
 
         loop_closed = False
         gripper_moved = False
-
-        robot_moving = False
-
         motor_moved = False
 
         satellite_time = 7.6541
@@ -84,10 +75,9 @@ class Controller:
                 rcm.robot_moving = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
-            if t >= gripper_time and gripper_moved == False:
-                gcm.gripper_enable = True
-                self.lc.publish(self.gcm_channel, gcm.encode())
+            if (time.time()-start) > 1.0 and gripper_moved == False:
                 gripper_moved = True
+                self.move_gripper(0.02, 10.0, 60.0)
             
             if t > 15.0:
                 loop_closed = True
@@ -101,11 +91,6 @@ class Controller:
             #     mcm.motor_enable = True
             #     self.lc.publish(self.mcm_channel, mcm.encode())
             #     motor_moved = True
-
-            if (time.time()-start) > 1.0 and gripper_moved == False:
-                gripper_moved = True
-                self.move_gripper(0.02, 10.0, 60.0)
-            
             
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)

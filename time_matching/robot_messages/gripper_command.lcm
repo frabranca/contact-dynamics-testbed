@@ -3,4 +3,7 @@ package frankalcm;
 struct gripper_command
 {
    boolean gripper_enable;
+   double width;
+   double speed;
+   double force;
 }
