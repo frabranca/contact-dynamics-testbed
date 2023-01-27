@@ -1,5 +1,5 @@
 import lcm
-from robot_messages.frankalcm import robot_command, gripper_command
+from robot_messages.frankalcm import robot_command, robot_state, gripper_command
 from motor_messages.motorlcm import motor_command
 import time
 import numpy as np
@@ -7,7 +7,18 @@ import numpy as np
 """ controller.py = sends the commands to the franka robot, gripper and the motor"""
 
 class Controller:
-    def __init__(self, rcm_channel, gcm_channel):
+    def __init__(self, rcm_channel, rst_channel, gcm_channel):
+
+        # robot states
+        self.q = 0
+        self.q_d = 0
+        self.dq = 0
+        self.dq_d = 0
+        self.ddq_d = 0
+        self.tau_J = 0
+        self.tau_J_d = 0
+        self.dtau_J = 0
+        self.robot_enable = False
 
         # gripper states
         self.width = 0
@@ -21,12 +32,20 @@ class Controller:
 
         # define lcm channels
         self.rcm_channel = rcm_channel
+        self.rst_channel = rst_channel
         self.gcm_channel = gcm_channel
 
+        # subscribe to channels
         self.lc = lcm.LCM()
+        self.robot_sub   = self.lc.subscribe(self.rst_channel, self.robot_handler)
 
         # actions
-        self.control_loop()
+        self.lc.handle()
+        if self.robot_enabled == True:
+            self.control_loop()
+        
+        self.lc.unsubscribe(self.robot_sub)
+
     
     def message(self, string):
         print("-----")
@@ -48,12 +67,14 @@ class Controller:
         gripper_time = 1. + satellite_time - 0.5# - 0.6523
 
         while not loop_closed:
+            self.lc.handle()
             rcm = robot_command()
             gcm = gripper_command()
             mcm = motor_command()
 
             # control logic --------------------------------------------------
             t = time.time() - start
+            print(self.q[0])
             
             if (time.time()-start) >= gripper_time and gripper_moved == False:
                 gcm.gripper_enable = True
@@ -88,6 +109,19 @@ class Controller:
                 self.lc.publish(self.rcm_channel, rcm.encode())
                 self.message("loop closed")
                 loop_closed = True
+
+    def robot_handler(self, channel, data):
+        rst = robot_state.decode(data)
+        self.q             = rst.q
+        self.q_d           = rst.q_d
+        self.dq            = rst.dq
+        self.dq_d          = rst.dq_d
+        self.ddq_d         = rst.ddq_d
+        self.tau_J         = rst.tau_J
+        self.tau_J_d       = rst.tau_J_d
+        self.dtau_J        = rst.dtau_J
+        self.robot_enabled = rst.robot_enabled
+        self.pose          = rst.pose
     
     def move_gripper(self, width, speed, force):
         gcm = gripper_command()
@@ -98,4 +132,6 @@ class Controller:
         self.message("gripper command sent")
         
 if __name__ == "__main__":
-    controller = Controller("ROBOT COMMAND", "GRIPPER COMMAND")
+    controller = Controller("ROBOT COMMAND", 
+                            "ROBOT STATE",
+                            "GRIPPER COMMAND")

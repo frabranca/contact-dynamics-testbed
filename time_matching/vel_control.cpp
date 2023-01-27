@@ -40,7 +40,9 @@ class Handler
 };
 
 void message(const char* input){
+  std::cout << "-----" << std::endl;
   std::cout << "torque_control.cpp " << input << std::endl;
+  std::cout << "-----" << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -106,11 +108,15 @@ try {
     };
 
     // Start real-time control loop.
-    lcm.handle();
-    if (rcm_struct.loop_open_received == true){
-    	std::cout << "open loop" << std::endl;
-        robot.control(velocity_control);
-    }
+    // lcm.handle();
+    // if (rcm_struct.loop_open_received == true){
+    // 	std::cout << "open loop" << std::endl;
+    //     robot.control(velocity_control);
+    // }
+    // Start real-time control loop.
+    msg_to_send.robot_enabled = true;
+    lcm.publish("ROBOT STATE", &msg_to_send);
+    robot.control(velocity_control);
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;
