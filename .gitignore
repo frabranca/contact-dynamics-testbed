@@ -3,6 +3,6 @@
 /build
 /src/extra_stuff
 /time_matching/robot_messages/frankalcm
-/time_matching/robot_messages/motorlcm
+/time_matching/motor_messages/motorlcm
 /time_matching/extra_stuff
 
