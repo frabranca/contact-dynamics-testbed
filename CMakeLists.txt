@@ -14,7 +14,7 @@ add_executable(torque_control
 	src/torque_control.cpp)
 
 add_executable(gripper_control
-	src/gripper_control.cpp)
+	time_matching/gripper_control.cpp)
 
 add_executable(grasp_rod
 	src/utils/grasp_rod.cpp)

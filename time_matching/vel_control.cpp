@@ -14,9 +14,7 @@
 // define struct to store received commands from controller
 struct command_received{
     std::array<double, 7> dq;
-    bool loop_open_received;
-    bool loop_closed_received;
-    bool motion_finished_received;
+    bool robot_moving;
 };
 
 command_received rcm_struct;
@@ -30,10 +28,7 @@ class Handler
                 const std::string& chan, 
                 const frankalcm::robot_command* msg_received){
               int i;
-              rcm_struct.loop_closed_received = msg_received->loop_closed;
-              rcm_struct.loop_open_received = msg_received->loop_open;
-              rcm_struct.motion_finished_received = msg_received->motion_finished;
-
+              rcm_struct.robot_moving = msg_received->robot_moving;
               for (i=0; i<7; i++){
                 rcm_struct.dq[i] = msg_received->dq[i];}
               }
@@ -79,10 +74,12 @@ try {
 
     // Define callback for the joint torque control loop.
     franka::JointVelocities zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-
+    double time = 0.0;
     std::function<franka::JointVelocities(const franka::RobotState&, franka::Duration period)>
         velocity_control =
             [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
+        
+        time += period.toSec();
             
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
@@ -98,17 +95,16 @@ try {
         msg_to_send.robot_enable = true;
 
         lcm.publish("ROBOT STATE", &msg_to_send);
-        lcm.handle();
+        
+        if (time < 15.){
+            lcm.handle();
+        }
+        
+        else{
+            return MotionFinished(zero);
+        }  
 
-        // if (state.q[0] <= -0.49) {
-        //     return zero;}
-        // else{
-        //     //lcm.handle();
-        //     return rcm_struct.q_d;}
-
-        if (rcm_struct.motion_finished_received == false){
-          return rcm_struct.q_d
-        }        
+        return rcm_struct.dq;
 
     };
 

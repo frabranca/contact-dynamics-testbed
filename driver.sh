@@ -6,8 +6,8 @@
 #sudo ./build/gripper_control
 
 python3 time_matching/controller.py &
-python3 time_matching/listener.py &
 sudo ./build/vel_control
+sudo ./build/gripper_control
 
 
 

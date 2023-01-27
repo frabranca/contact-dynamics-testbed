@@ -77,7 +77,6 @@ class Controller:
             # control logic --------------------------------------------------
             t = time.time() - start
             t_robot = t - robot_time
-            print(self.q[0])
             
             if (t >= robot_time) and (t < robot_time + 2.0):
                 dq1 = -0.5 + 0.5*np.cos(np.pi * t_robot)
@@ -90,7 +89,7 @@ class Controller:
                 self.lc.publish(self.gcm_channel, gcm.encode())
                 gripper_moved = True
             
-            if t > 10.0:
+            if t > 15.0:
                 loop_closed = True
             
             else:
@@ -103,9 +102,9 @@ class Controller:
             #     self.lc.publish(self.mcm_channel, mcm.encode())
             #     motor_moved = True
 
-            # if (time.time()-start) > 1.0 and gripper_moved == False:
-            #     gripper_moved = True
-            #     self.move_gripper(0.02, 10.0, 60.0)
+            if (time.time()-start) > 1.0 and gripper_moved == False:
+                gripper_moved = True
+                self.move_gripper(0.02, 10.0, 60.0)
             
             
     def robot_handler(self, channel, data):
