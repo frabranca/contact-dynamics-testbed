@@ -2,10 +2,8 @@ package frankalcm;
 
 struct robot_command
 { 
-    double q_d[7];
-    boolean loop_open;
-    boolean loop_closed;
-    boolean motion_finished;
+    double dq[7];
+    boolean robot_moving;
 }
 
 

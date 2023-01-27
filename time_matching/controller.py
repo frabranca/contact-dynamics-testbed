@@ -58,7 +58,9 @@ class Controller:
 
         loop_closed = False
         gripper_moved = False
-        motion_finished = False
+
+        robot_moving = False
+
         motor_moved = False
 
         satellite_time = 7.6541
@@ -74,28 +76,27 @@ class Controller:
 
             # control logic --------------------------------------------------
             t = time.time() - start
+            t_robot = t - robot_time
             print(self.q[0])
-            rcm.q_d = np.array([0., 0., 0., 0., 0., 0., 0.])
-            self.lc.publish(self.rcm_channel, rcm.encode())
             
-            if (time.time()-start) >= gripper_time and gripper_moved == False:
+            if (t >= robot_time) and (t < robot_time + 2.0):
+                dq1 = -0.5 + 0.5*np.cos(np.pi * t_robot)
+                rcm.dq = np.array([dq1, 0., 0., 0., 0., 0., 0.])
+                rcm.robot_moving = True
+                self.lc.publish(self.rcm_channel, rcm.encode())
+            
+            if t >= gripper_time and gripper_moved == False:
                 gcm.gripper_enable = True
                 self.lc.publish(self.gcm_channel, gcm.encode())
                 gripper_moved = True
             
-            if (time.time()-start) >= robot_time and motion_finished == False:
-                # rcm.loop_open = True
-                t_robot = t - robot_time
-                q_d1 = -0.5 + 0.5*np.cos(np.pi * t_robot)
-                rcm.q_d = np.array([q_d1, 0., 0., 0., 0., 0., 0.])
-                rcm.motion_finished = False
+            if t > 10.0:
+                loop_closed = True
+            
+            else:
+                rcm.robot_moving = False
+                rcm.dq = np.array([0., 0., 0., 0., 0., 0., 0.])
                 self.lc.publish(self.rcm_channel, rcm.encode())
-                
-                if t_robot >= 2.0:
-                    rcm.motion_finished = True
-                    print("motion finished")
-                    self.lc.publish(self.rcm_channel, rcm.encode())
-                    motion_finished = True
             
             # if (time.time()-start) >= motor_time and motor_moved == False:
             #     mcm.motor_enable = True
@@ -106,12 +107,7 @@ class Controller:
             #     gripper_moved = True
             #     self.move_gripper(0.02, 10.0, 60.0)
             
-            if (time.time()-start) > 10.0:
-                rcm.loop_closed = True
-                self.lc.publish(self.rcm_channel, rcm.encode())
-                self.message("loop closed")
-                loop_closed = True
-
+            
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
         self.q             = rst.q

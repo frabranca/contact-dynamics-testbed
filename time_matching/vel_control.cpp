@@ -13,7 +13,7 @@
 
 // define struct to store received commands from controller
 struct command_received{
-    std::array<double, 7> q_d;
+    std::array<double, 7> dq;
     bool loop_open_received;
     bool loop_closed_received;
     bool motion_finished_received;
@@ -35,7 +35,7 @@ class Handler
               rcm_struct.motion_finished_received = msg_received->motion_finished;
 
               for (i=0; i<7; i++){
-                rcm_struct.q_d[i] = msg_received->q_d[i];}
+                rcm_struct.dq[i] = msg_received->dq[i];}
               }
 };
 
@@ -100,11 +100,16 @@ try {
         lcm.publish("ROBOT STATE", &msg_to_send);
         lcm.handle();
 
-        if (state.q[0] <= -0.49) {
-            return zero;}
-        else{
-            //lcm.handle();
-            return rcm_struct.q_d;}
+        // if (state.q[0] <= -0.49) {
+        //     return zero;}
+        // else{
+        //     //lcm.handle();
+        //     return rcm_struct.q_d;}
+
+        if (rcm_struct.motion_finished_received == false){
+          return rcm_struct.q_d
+        }        
+
     };
 
     // Start real-time control loop.
