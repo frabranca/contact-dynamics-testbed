@@ -7,7 +7,7 @@
 
 python3 time_matching/controller.py &
 sudo ./build/vel_control
-sudo ./build/gripper_control
+
 
 
 
