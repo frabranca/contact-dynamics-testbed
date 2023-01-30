@@ -3,10 +3,10 @@ import lcm
 import numpy as np
 from motor_driver.canmotorlib import CanMotorController
 import matplotlib.pyplot as plt
-from robot_messages.motorlcm import motor_command
+from motor_messages.motorlcm import motor_command
 
 class motor_controller:
-    def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_9_V1p1", channel = "MOTOR_COMMAND"):
+    def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_9_V1p1", channel = "MOTOR COMMAND"):
         self.t = t
         self.velocity = velocity
         self.channel = channel

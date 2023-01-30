@@ -2,7 +2,7 @@ package frankalcm;
 
 struct robot_command
 { 
-    double dq[7];
+    double tau[7];
     boolean robot_moving;
 }
 

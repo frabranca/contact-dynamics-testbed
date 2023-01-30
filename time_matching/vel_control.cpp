@@ -13,7 +13,7 @@
 
 // define struct to store received commands from controller
 struct command_received{
-    std::array<double, 7> dq;
+    std::array<double, 7> tau;
     bool robot_moving;
 };
 
@@ -30,7 +30,7 @@ class Handler
               int i;
               rcm_struct.robot_moving = msg_received->robot_moving;
               for (i=0; i<7; i++){
-                rcm_struct.dq[i] = msg_received->dq[i];}
+                rcm_struct.tau[i] = msg_received->tau[i];}
               }
 };
 
@@ -73,11 +73,11 @@ try {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Define callback for the joint torque control loop.
-    franka::JointVelocities zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    franka::Torques zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     double time = 0.0;
-    std::function<franka::JointVelocities(const franka::RobotState&, franka::Duration period)>
+    std::function<franka::Torques(const franka::RobotState&, franka::Duration period)>
         velocity_control =
-            [&](const franka::RobotState& state, franka::Duration period) -> franka::JointVelocities {
+            [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
         
         time += period.toSec();
             
@@ -96,7 +96,7 @@ try {
 
         lcm.publish("ROBOT STATE", &msg_to_send);
         
-        if (time < 15.){
+        if (time < 20.){
             lcm.handle();
         }
         
@@ -104,7 +104,7 @@ try {
             return MotionFinished(zero);
         }  
 
-        return rcm_struct.dq;
+        return rcm_struct.tau;
 
     };
 
