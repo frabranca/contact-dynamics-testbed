@@ -77,7 +77,7 @@ class Controller:
         satellite_time = 7.6541
         motor_time = 1.
         robot_time = 1. + satellite_time - 3.#1.35439
-        gripper_time = 1. + satellite_time -0.5# - 0.6523
+        gripper_time = 1. + satellite_time# - 0.6523
 
         while not self.loop_closed:
             Kp1 = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])

@@ -11,6 +11,11 @@ class motor_controller:
         self.velocity = velocity
         self.channel = channel
 
+        self.t_save   = []
+        self.pos_save = []
+        self.vel_save = []
+        self.cur_save = []
+
         self.lc = lcm.LCM()
         self.lc.subscribe(self.channel, self.motor_handler)
         self.motor = CanMotorController(can_port, motor_id, motor_type=motor_type)
@@ -18,6 +23,7 @@ class motor_controller:
 
         self.lc.handle()
         self.loop()
+        self.show_plot()
 
     def loop(self):
         start = time.time()
@@ -29,13 +35,25 @@ class motor_controller:
             else:
                 pos, vel, cur = self.motor.send_deg_command(0, self.velocity, 0, 5, 2)
                 #pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)        
-        
+            
+            self.t_save.append(time.time()-start)
+            self.pos_save.append(pos)
+            self.vel_save.append(vel)
+            self.cur_save.append(cur)
+
+            
         print("Disabling Motors...")
         self.motor.disable_motor()
     
     def motor_handler(self, channel, data):
         mcm = motor_command.decode(data)
         self.motor_enable = mcm.motor_enable
+    
+    def show_plot(self):
+        plt.figure()
+        plt.plot(self.t_save, self.vel_save)
+        plt.grid()
+        plt.show()
 
 if __name__=="__main__":
     can_port = 'can0'
