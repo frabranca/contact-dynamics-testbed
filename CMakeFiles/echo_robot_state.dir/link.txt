@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/echo_robot_state.dir/src/utils/echo_robot_state.cpp.o -o echo_robot_state  /usr/lib/libfranka.so.0.8.0 

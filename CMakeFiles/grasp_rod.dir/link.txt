@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/grasp_rod.dir/src/utils/grasp_rod.cpp.o -o grasp_rod  /usr/lib/libfranka.so.0.8.0 
