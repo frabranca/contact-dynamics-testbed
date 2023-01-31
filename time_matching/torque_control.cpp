@@ -76,7 +76,7 @@ try {
     franka::Torques zero = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     double time = 0.0;
     std::function<franka::Torques(const franka::RobotState&, franka::Duration period)>
-        velocity_control =
+        torque_control =
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
         
         time += period.toSec();
@@ -90,6 +90,10 @@ try {
             msg_to_send.tau_J[i] = state.tau_J[i];
             msg_to_send.tau_J_d[i] = state.tau_J_d[i];
             msg_to_send.dtau_J[i] = state.dtau_J[i];
+        }
+        
+        for (int i=0; i<6; i++){
+            msg_to_send.ext_wrench[i] = state.O_F_ext_hat_K[i];
         }
 
         msg_to_send.robot_enable = true;
@@ -107,17 +111,10 @@ try {
         return rcm_struct.tau;
 
     };
-
-    // Start real-time control loop.
-    // lcm.handle();
-    // if (rcm_struct.loop_open_received == true){
-    // 	std::cout << "open loop" << std::endl;
-    //     robot.control(velocity_control);
-    // }
-    // Start real-time control loop.
+    
     msg_to_send.robot_enable = true;
     lcm.publish("ROBOT STATE", &msg_to_send);
-    robot.control(velocity_control);
+    robot.control(torque_control);
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;

@@ -16,10 +16,11 @@ class Controller:
         self.loop_closed = False
 
         # data lists
-        self.t_save = []
-        self.q_save = []
-        self.dq_save = []
-        self.tau_save = []
+        self.t_save          = []
+        self.q_save          = []
+        self.dq_save         = []
+        self.tau_save        = []
+        self.ext_wrench_save = []
 
         # robot states
         self.q = 0
@@ -31,6 +32,7 @@ class Controller:
         self.tau_J_d = 0
         self.dtau_J = 0
         self.robot_enable = False
+        self.ext_wrench = 0
 
         # gripper states
         self.width = 0
@@ -55,13 +57,6 @@ class Controller:
 
         if self.save_data:
             self.write_data()
-        
-        if self.plot_data==True:
-            self.t_save = np.array(self.t_save)
-            self.q_save = np.array(self.q_save)
-            self.dq_save = np.array(self.dq_save)
-            self.tau_save = np.array(self.tau_save)
-            self.show_plot()
     
     def message(self, string):
         print("-----")
@@ -82,7 +77,8 @@ class Controller:
         while not self.loop_closed:
             Kp1 = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
             Kd1 = np.array([0.3, 0., 0., 0., 0., 0., 0.])
-            Kd2 = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+            Kp2 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+            Kd2 = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
             self.lc.handle()
             rcm = robot_command()
             gcm = gripper_command()
@@ -99,10 +95,10 @@ class Controller:
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])
                 dq_des = np.array([dq1_des, 0., 0., 0., 0., 0., 0.])
 
-                q1_error = q_des - self.q
-                dq1_error = dq_des - self.dq
+                q_error = q_des - self.q
+                dq_error = dq_des - self.dq
 
-                rcm.tau = Kp1 * q1_error + Kd1 * dq1_error
+                rcm.tau = Kp1 * q_error + Kd1 * dq_error
 
                 rcm.robot_moving = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
@@ -118,9 +114,9 @@ class Controller:
                 rcm.robot_moving = False
                 dq_des = np.array([0., 0., 0., 0., 0., 0., 0.])
 
-                dq1_error = dq_des - self.dq
+                dq_error = dq_des - self.dq
 
-                rcm.tau = Kd2 * dq1_error
+                rcm.tau = Kd2 * dq_error
                 #rcm.tau = np.array([0., 0., 0., 0., 0., 0., 0.])
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
@@ -134,6 +130,7 @@ class Controller:
                 self.q_save.append(self.q)
                 self.dq_save.append(self.dq)
                 self.tau_save.append(self.tau_J)
+                self.ext_wrench_save.append(self.ext_wrench)
             
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
@@ -145,7 +142,8 @@ class Controller:
         self.tau_J         = rst.tau_J
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
-        self.robot_enable = rst.robot_enable
+        self.robot_enable  = rst.robot_enable
+        self.ext_wrench    = rst.ext_wrench
     
     def move_gripper(self, width, speed, force):
         gcm = gripper_command()
@@ -163,18 +161,35 @@ class Controller:
         output.close()
     
     def show_plot(self):
-        plt.figure()
-
         labels = ["1", "2", "3", "4", "5", "6", "7"]
-        plt.subplot(131)
+        labels_ef = ["Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]"]
+
+        plt.figure()
         plt.plot(self.t_save, self.q_save)
-        plt.legend(labels)
+        plt.xlabel("time [s]")
+        plt.ylabel("joint position [rad]")
+        plt.legend(labels, loc="best")
         plt.grid()
-        plt.subplot(132)
+
+        plt.figure()
         plt.plot(self.t_save, self.dq_save)
+        plt.xlabel("time [s]")
+        plt.ylabel("joint velocity [rad/s]")
+        plt.legend(labels, loc="best")
         plt.grid()
-        plt.subplot(133)
+            
+        plt.figure()
         plt.plot(self.t_save, self.tau_save)
+        plt.xlabel("time [s]")
+        plt.ylabel("joint torque [Nm]")
+        plt.legend(labels, loc="best")
+        plt.grid()
+
+        plt.figure()
+        plt.plot(self.t_save, self.ext_wrench_save)
+        plt.xlabel("time [s]")
+        plt.ylabel("external force on EF")
+        plt.legend(labels_ef, loc="best")
         plt.grid()
 
         plt.show()
@@ -184,3 +199,11 @@ if __name__ == "__main__":
                             "ROBOT STATE",
                             "GRIPPER COMMAND",
                             "MOTOR COMMAND", plot_data=True)
+    
+    if controller.plot_data==True:
+        controller.t_save = np.array(controller.t_save)
+        controller.q_save = np.array(controller.q_save)
+        controller.dq_save = np.array(controller.dq_save)
+        controller.tau_save = np.array(controller.tau_save)
+        controller.ext_wrench_save = np.array(controller.ext_wrench_save)
+        controller.show_plot()

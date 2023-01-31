@@ -10,9 +10,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src
 )
 
-add_executable(torque_control 
-	src/torque_control.cpp)
-
 add_executable(gripper_control
 	time_matching/gripper_control.cpp)
 
@@ -37,8 +34,8 @@ add_executable(time_measure
 add_executable(velocity
 	src/utils/generate_joint_velocity_motion.cpp)
 
-add_executable(vel_control
-	time_matching/vel_control.cpp)
+add_executable(torque_control
+	time_matching/torque_control.cpp)
 
 target_link_libraries(torque_control
 	Franka::Franka
@@ -70,9 +67,5 @@ target_link_libraries(position_control
 	lcm)
 
 target_link_libraries(velocity
-	Franka::Franka
-	lcm)
-
-target_link_libraries(vel_control
 	Franka::Franka
 	lcm)
