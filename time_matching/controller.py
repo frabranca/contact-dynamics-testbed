@@ -21,6 +21,7 @@ class Controller:
         self.dq_save         = []
         self.tau_save        = []
         self.ext_wrench_save = []
+        self.EFpose_save     = []
 
         # robot states
         self.q = 0
@@ -33,6 +34,7 @@ class Controller:
         self.dtau_J = 0
         self.robot_enable = False
         self.ext_wrench = 0
+        self.EFpose = 0
 
         # gripper states
         self.width = 0
@@ -73,12 +75,14 @@ class Controller:
         motor_time = 1.
         robot_time = 1. + satellite_time - 3.#1.35439
         gripper_time = 1. + satellite_time# - 0.6523
+        
+        # controller gains  
+        Kp1 = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+        Kd1 = np.array([0.3, 0., 0., 0., 0., 0., 0.])
+
+        Kd2 = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
 
         while not self.loop_closed:
-            Kp1 = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
-            Kd1 = np.array([0.3, 0., 0., 0., 0., 0., 0.])
-            Kp2 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-            Kd2 = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
             self.lc.handle()
             rcm = robot_command()
             gcm = gripper_command()
@@ -131,6 +135,7 @@ class Controller:
                 self.dq_save.append(self.dq)
                 self.tau_save.append(self.tau_J)
                 self.ext_wrench_save.append(self.ext_wrench)
+                self.EFpose_save.append(self.EFpose)
             
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
@@ -144,6 +149,7 @@ class Controller:
         self.dtau_J        = rst.dtau_J
         self.robot_enable  = rst.robot_enable
         self.ext_wrench    = rst.ext_wrench
+        self.EFpose        = rst.EFpose
     
     def move_gripper(self, width, speed, force):
         gcm = gripper_command()
@@ -191,6 +197,13 @@ class Controller:
         plt.ylabel("external force on EF")
         plt.legend(labels_ef, loc="best")
         plt.grid()
+        
+        plt.figure()
+        plt.plot(self.t_save, self.EFpose_save)
+        plt.xlabel("time [s]")
+        plt.ylabel("EF position [m]")
+        plt.legend(labels_ef, loc="best")
+        plt.grid()
 
         plt.show()
         
@@ -206,4 +219,5 @@ if __name__ == "__main__":
         controller.dq_save = np.array(controller.dq_save)
         controller.tau_save = np.array(controller.tau_save)
         controller.ext_wrench_save = np.array(controller.ext_wrench_save)
+        controller.EFpose_save = np.array(controller.EFpose_save)
         controller.show_plot()

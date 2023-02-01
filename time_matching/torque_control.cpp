@@ -95,6 +95,10 @@ try {
         for (int i=0; i<6; i++){
             msg_to_send.ext_wrench[i] = state.O_F_ext_hat_K[i];
         }
+        
+        msg_to_send.EFpose[0] = state.O_T_EE[12];
+        msg_to_send.EFpose[1] = state.O_T_EE[13];
+        msg_to_send.EFpose[2] = state.O_T_EE[14];
 
         msg_to_send.robot_enable = true;
 

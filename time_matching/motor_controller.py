@@ -52,6 +52,8 @@ class motor_controller:
     def show_plot(self):
         plt.figure()
         plt.plot(self.t_save, self.vel_save)
+        plt.xlabel("time [s]")
+        plt.ylabel("velocity [deg/s]")
         plt.grid()
         plt.show()
 
