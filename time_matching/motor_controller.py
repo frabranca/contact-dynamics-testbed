@@ -25,6 +25,9 @@ class motor_controller:
         self.loop()
         self.show_plot()
 
+        self.vel_save = np.array(self.vel_save)
+        self.write_data()
+
     def loop(self):
         start = time.time()
 
@@ -55,7 +58,15 @@ class motor_controller:
         plt.xlabel("time [s]")
         plt.ylabel("velocity [deg/s]")
         plt.grid()
+        plt.savefig("satellite_velocity.png")
         plt.show()
+    
+    def write_data(self):
+        output = open("satellite_velocity", "w")
+        output.truncate()
+        for i in range(len(self.vel_save)):
+            output.write(str(self.t_save[i]) + ' ' + ' ' + str(self.vel_save[i]) + '\n')
+        output.close()
 
 if __name__=="__main__":
     can_port = 'can0'

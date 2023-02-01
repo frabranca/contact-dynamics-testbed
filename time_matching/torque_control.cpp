@@ -93,7 +93,7 @@ try {
         }
         
         for (int i=0; i<6; i++){
-            msg_to_send.ext_wrench[i] = state.O_F_ext_hat_K[i];
+            msg_to_send.ext_force[i] = state.O_F_ext_hat_K[i];
         }
         
         msg_to_send.EFpose[0] = state.O_T_EE[12];

@@ -11,6 +11,6 @@ struct robot_state
    double tau_J_d[7];
    double dtau_J[7];
    boolean robot_enable;
-   double ext_wrench[6];
+   double ext_force[6];
    double EFpose[3];
 }
