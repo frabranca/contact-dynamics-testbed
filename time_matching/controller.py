@@ -77,11 +77,10 @@ class Controller:
         gripper_time = 1. + satellite_time# - 0.6523
         
         # controller gains  
-        Kp_initial = np.array([1., 1., 1., 1., 1., 1., 1.])
-        Kd_initial = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        Kd_wait = np.array([1., 1., 1., 1., 1., 1., 1.])
 
-        Kp_trajectory = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
-        Kd_trajectory = np.array([0.3, 0., 0., 0., 0., 0., 0.])
+        Kp_traj = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+        Kd_traj = np.array([0.3, 0., 0., 0., 0., 0., 0.])
 
         Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
 
@@ -95,6 +94,7 @@ class Controller:
             t = time.time() - start
             t_robot = t - robot_time
 
+            # WAITING PHASE
             if (t <= robot_time):
                 rcm.robot_moving = False
                 q_des  = np.array([0., 0., 0., 0., 0., 0., 0.])
@@ -104,11 +104,12 @@ class Controller:
                 dq_error = dq_des - self.dq
 
                 # robot acts as a damper to detumble satellite
-                rcm.tau =  Kp_initial * dq_error
+                rcm.tau =  Kd_wait * dq_error
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
+            # TRAJECTORY PHASE
             if (t >= robot_time) and (t < robot_time + 2.0):
-                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot)
+                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) - 0.05
                 dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
 
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])
@@ -117,18 +118,27 @@ class Controller:
                 q_error = q_des - self.q
                 dq_error = dq_des - self.dq
 
-                rcm.tau = Kp_trajectory * q_error + Kd_trajectory * dq_error
+                rcm.tau = Kp_traj * q_error + Kd_traj * dq_error
 
                 rcm.robot_moving = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
+            # GRIPPER COMMAND
             if (time.time()-start) >= gripper_time and gripper_moved == False:
                 gripper_moved = True
                 self.move_gripper(0.02, 10.0, 60.0)
             
+            # MOTOR COMMAND
+            if (time.time()-start) >= motor_time and motor_moved == False:
+                mcm.motor_enable = True
+                self.lc.publish(self.mcm_channel, mcm.encode())
+                motor_moved = True
+            
+            # FINISH TEST
             if t > 20.0:
                 self.loop_closed = True
             
+            # DAMPING PHASE
             else:
                 rcm.robot_moving = False
                 dq_des = np.array([0., 0., 0., 0., 0., 0., 0.])
@@ -138,11 +148,6 @@ class Controller:
                 # robot acts as a damper to detumble satellite
                 rcm.tau = Kd_damp * dq_error
                 self.lc.publish(self.rcm_channel, rcm.encode())
-            
-            if (time.time()-start) >= motor_time and motor_moved == False:
-                mcm.motor_enable = True
-                self.lc.publish(self.mcm_channel, mcm.encode())
-                motor_moved = True
 
             if self.plot_data:
                 self.t_save.append(t)
