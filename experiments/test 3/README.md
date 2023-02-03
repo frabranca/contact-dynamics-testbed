@@ -6,3 +6,5 @@ The robot closed control loop has 3 phases:
 3) damping phase
 For each of these phases different gains are used. 
 
+Moreover the satellite was detached and attached again to the motor, which means that the contact point changed slightly. To correct for this, the position equation was adjusted to match the new contact point location.
+
