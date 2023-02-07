@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from motor_messages.motorlcm import motor_command
 
 class motor_controller:
-    def __init__(self, can_port, motor_id, t, velocity, motor_type="AK80_6_V1p1", channel = "MOTOR COMMAND"):
-        self.t = t
+    def __init__(self, can_port, motor_id, cf, velocity, motor_type="AK80_6_V1p1", channel = "MOTOR COMMAND"):
+        self.cf = cf
         self.velocity = velocity
         self.channel = channel
 
@@ -27,22 +27,36 @@ class motor_controller:
 
         self.vel_save = np.array(self.vel_save)
         self.write_data()
+    
+    def friction_compensation(self, v):
+        return self.cf*np.arctan(100*v)
 
     def loop(self):
         start = time.time()
 
-        while (time.time() - start) < self.t:
+        Kp = 0
+        Kd = 5
+
+        pos_des = 0
+        vel_des = self.velocity
+        tau_des = 0.15
+
+        pos_meas = 0
+        vel_meas = 0
+        cur_meas = 0
+
+        while (time.time() - start) < 15:
             if (time.time() - start) >= 7.:
-                pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)
-                # self.motor.send_rad_command(0, 0, 0, 0, 0)
+                torque = self.friction_compensation(vel_meas)
+                pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(0, 0, 0, 0, torque)
             else:
-                pos, vel, cur = self.motor.send_deg_command(0, self.velocity, 0, 5, 2)
-                #pos, vel, cur = self.motor.send_deg_command(0, 0, 0, 0, 0)        
+                torque = tau_des + self.friction_compensation(vel_meas) + tau_des
+                pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
             
             self.t_save.append(time.time()-start)
-            self.pos_save.append(pos)
-            self.vel_save.append(vel)
-            self.cur_save.append(cur)
+            self.pos_save.append(pos_meas)
+            self.vel_save.append(vel_meas)
+            self.cur_save.append(cur_meas)
 
             
         print("Disabling Motors...")
@@ -71,4 +85,4 @@ class motor_controller:
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 3
-    motor_controller(can_port, motor_id, 14, 20)
+    motor_controller(can_port, motor_id, 0.095, 20)
