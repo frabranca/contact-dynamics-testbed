@@ -71,10 +71,11 @@ class Controller:
         gripper_moved = False
         motor_moved = False
 
-        satellite_time = 7.6541
+        # satellite_time = 7.6541
+        satellite_time = 7.5
         motor_time = 1.
         robot_time = 1. + satellite_time - 3.#1.35439
-        gripper_time = 1. + satellite_time# - 0.6523
+        gripper_time = 1. + satellite_time # - 0.6523
         
         # controller gains  
         Kd_wait = np.array([1., 1., 1., 1., 1., 1., 1.])
@@ -109,7 +110,7 @@ class Controller:
             
             # TRAJECTORY PHASE
             if (t >= robot_time) and (t < robot_time + 2.0):
-                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) - 0.05
+                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + 0.02
                 dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
 
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])

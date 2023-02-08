@@ -14,12 +14,14 @@ class motor_controller:
         self.t_save   = []
         self.pos_save = []
         self.vel_save = []
+        self.vel_filter_save = []
         self.cur_save = []
 
         self.lc = lcm.LCM()
         self.lc.subscribe(self.channel, self.motor_handler)
         self.motor = CanMotorController(can_port, motor_id, motor_type=motor_type)
-        self.motor.enable_motor()
+        _, _, _ = self.motor.set_zero_position()
+        _, _, _ = self.motor.enable_motor()
 
         self.lc.handle()
         self.loop()
@@ -45,14 +47,26 @@ class motor_controller:
         vel_meas = 0
         cur_meas = 0
 
-        while (time.time() - start) < 15:
-            if (time.time() - start) >= 7.:
+        i = 0
+
+        while (time.time() - start) < 20:
+            if (time.time() - start) >= 5.:
                 torque = self.friction_compensation(vel_meas)
                 pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(0, 0, 0, 0, torque)
             else:
-                torque = tau_des + self.friction_compensation(vel_meas) + tau_des
+                torque = self.friction_compensation(vel_meas) + tau_des
                 pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
             
+            filter = 100
+            filter_size = filter-1
+            if i > filter_size+1:
+                vel_filtered = sum(self.vel_save[i-filter_size:i+1]) / (filter_size+1)
+            else:
+                vel_filtered = 0
+
+            self.vel_filter_save.append(vel_filtered)
+            i+=1
+
             self.t_save.append(time.time()-start)
             self.pos_save.append(pos_meas)
             self.vel_save.append(vel_meas)
@@ -69,6 +83,7 @@ class motor_controller:
     def show_plot(self):
         plt.figure()
         plt.plot(self.t_save, self.vel_save)
+        plt.plot(self.t_save, self.vel_filter_save)
         plt.xlabel("time [s]")
         plt.ylabel("velocity [deg/s]")
         plt.grid()
@@ -79,7 +94,7 @@ class motor_controller:
         output = open("satellite_velocity", "w")
         output.truncate()
         for i in range(len(self.vel_save)):
-            output.write(str(self.t_save[i]) + ' ' + ' ' + str(self.vel_save[i]) + '\n')
+            output.write(str(self.t_save[i]) + ' ' + ' ' + str(self.vel_save[i]) + str(self.vel_filter_save[i]) + '\n')
         output.close()
 
 if __name__=="__main__":

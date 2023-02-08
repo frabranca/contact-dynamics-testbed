@@ -10,13 +10,15 @@ tau_ = []
 vel_filter = []
 
 cf = 0.095 # v = 20
+# cf = 0.096
 # cf = 0.01
 
 def tau_friction(v):
     return cf*np.arctan(100*v)
 
 motor = CanMotorController('can0', 3, motor_type="AK80_6_V1p1")
-motor.enable_motor()
+_, _, _ = motor.set_zero_position()
+_, _, _ = motor.enable_motor()
 start = time.time()
 i=0
 
@@ -27,8 +29,8 @@ Kd = 5
 tau_des = 0.15
 vel_meas = 0
 
-while (time.time()-start) < 10.:
-    if (time.time()-start) < 5.:
+while (time.time()-start) < 15.:
+    if (time.time()-start) < 3.:
         torque = tau_friction(vel_meas) + tau_des
         pos_meas, vel_meas, tau_meas = motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
     # pos, vel, tau = motor.send_deg_command(0, 0, 0, 0, 0)
@@ -55,7 +57,13 @@ while (time.time()-start) < 10.:
 
 motor.disable_motor()
 
+pos_ = np.cos(np.radians(np.array(pos_)))
+
+plt.figure()
 plt.plot(time_, vel_)
 plt.plot(time_, vel_filter)
+
+plt.figure()
+plt.plot(time_, pos_)
 
 plt.show()
