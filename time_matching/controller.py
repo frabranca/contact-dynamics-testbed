@@ -147,7 +147,8 @@ class Controller:
                 dq_error = dq_des - self.dq
 
                 # robot acts as a damper to detumble satellite
-                rcm.tau = Kd_damp * dq_error
+                # rcm.tau = Kd_damp * dq_error
+                rcm.tau = np.array([0., 0., 0., 0., 0., 0., 0.])
                 self.lc.publish(self.rcm_channel, rcm.encode())
 
             if self.plot_data:
@@ -183,30 +184,46 @@ class Controller:
     def write_data(self):
         output = open("joint_torques", "w")
         output.truncate()
+        columns = np.arange(1,8)
+        columns = ["tau" + str(i) for i in columns]
+        columns = ' '.join(map(str, columns))
+        output.write("time" + ' ' + columns + '\n')
         for i in range(len(self.tau_save)):
             output.write(str(self.t_save[i]) + ' ' + ' '.join(map(str, self.tau_save[i])) + '\n')
         output.close()
 
         output = open("joint_velocities", "w")
         output.truncate()
+        columns = np.arange(1,8)
+        columns = ["dq" + str(i) for i in columns]
+        columns = ' '.join(map(str, columns))
+        output.write("time" + ' ' + columns + '\n')
         for i in range(len(self.tau_save)):
             output.write(str(self.t_save[i]) + ' ' + ' '.join(map(str, self.dq_save[i])) + '\n')
         output.close()
 
         output = open("joint_positions", "w")
         output.truncate()
+        columns = np.arange(1,8)
+        columns = ["q" + str(i) for i in columns]
+        columns = ' '.join(map(str, columns))
+        output.write("time" + ' ' + columns + '\n')
         for i in range(len(self.tau_save)):
             output.write(str(self.t_save[i]) + ' ' + ' '.join(map(str, self.q_save[i])) + '\n')
         output.close()
 
         output = open("ext_force", "w")
         output.truncate()
+        columns = "Fx Fy Fz Tx Ty Tz"
+        output.write("time" + ' ' + columns + '\n')
         for i in range(len(self.ext_force_save)):
             output.write(str(self.t_save[i]) + ' ' + ' '.join(map(str, self.ext_force_save[i])) + '\n')
         output.close()
 
         output = open("EFpose", "w")
         output.truncate()
+        columns = "x_ef y_ef z_ef"
+        output.write("time" + ' ' + columns + '\n')
         for i in range(len(self.EFpose_save)):
             output.write(str(self.t_save[i]) + ' ' + ' '.join(map(str, self.EFpose_save[i])) + '\n')
         output.close()
@@ -253,7 +270,7 @@ class Controller:
         plt.plot(self.t_save, self.EFpose_save)
         plt.xlabel("time [s]")
         plt.ylabel("EF position [m]")
-        plt.legend(labels_ef, loc="best")
+        plt.legend(['x', 'y', 'z'], loc="best")
         plt.savefig("end_effector_position.png")
         plt.grid()
 

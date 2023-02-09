@@ -6,8 +6,8 @@
 #include <franka/robot.h>
 
 /**
- * @example echo_robot_state.cpp
- * An example showing how to continuously read the robot state.
+ * echo_robot_state.cpp
+ * used to read the robot state (non real-time).
  */
 
 int main(int argc, char** argv) {
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     for (int i=0; i<7; i++){
     std::cout << robot_state.q[i] << ", ";
     }
-    //std::cout << robot_state.O_T_EE_c[14] << std::endl;    
+
     }
 
    catch (franka::Exception const& e) {

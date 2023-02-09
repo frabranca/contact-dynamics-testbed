@@ -8,16 +8,13 @@
 #include "common_functions.cpp"
 
 /**
- * @example generate_cartesian_pose_motion.cpp
- * An example showing how to generate a Cartesian motion.
- *
- * @warning Before executing this example, make sure there is enough space in front of the robot.
+ * 
  */
 
 int main(int argc, char** argv) {
   try {
     franka::Robot robot("192.168.131.40");
-    franka::Gripper gripper("192.168.131.40");
+
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
@@ -46,10 +43,6 @@ int main(int argc, char** argv) {
 
       if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_c;
-      }
-
-      if (time == 0.809) {
-        gripper.grasp(0.01, 0.5, 60);
       }
 
       std::cout << time << ",";

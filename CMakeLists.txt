@@ -13,9 +13,6 @@ include_directories(
 add_executable(gripper_control
 	time_matching/gripper_control.cpp)
 
-add_executable(grasp_rod
-	src/utils/grasp_rod.cpp)
-
 add_executable(echo_robot_state
 	src/utils/echo_robot_state.cpp)
 	
@@ -25,12 +22,14 @@ add_executable(torque_position_control
 add_executable(position_control
 	src/position_control.cpp)
 
-
 add_executable(time_measure
 	src/utils/time_measure.cpp)
 
 add_executable(torque_control
 	time_matching/torque_control.cpp)
+	
+add_executable(cartesian_pose
+	time_matching/utils/cartesian_pose.cpp)
 
 target_link_libraries(torque_control
 	Franka::Franka
@@ -39,9 +38,6 @@ target_link_libraries(torque_control
 target_link_libraries(gripper_control
 	Franka::Franka
 	lcm)
-
-target_link_libraries(grasp_rod
-	Franka::Franka)
 
 target_link_libraries(echo_robot_state
 	Franka::Franka)
@@ -53,7 +49,11 @@ target_link_libraries(torque_position_control
 target_link_libraries(time_measure
 	Franka::Franka
 	lcm)
+	
 target_link_libraries(position_control
 	Franka::Franka
 	lcm)
+
+target_link_libraries(cartesian_pose
+	Franka::Franka)
 

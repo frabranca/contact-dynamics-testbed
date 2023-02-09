@@ -12,14 +12,13 @@
 #include <franka/robot_state.h>
 
 /**
- * @file examples_common.h
- * Contains common types and functions for the examples.
+ * common_functions.h
+ * Contains common types and functions for the robot.
  */
 
 /**
  * Sets a default collision behavior, joint impedance, Cartesian impedance, and filter frequency.
  *
- * @param[in] robot Robot instance to set behavior on.
  */
 void setDefaultBehavior(franka::Robot& robot);
 

@@ -14,10 +14,9 @@
 using namespace std;
 using namespace std::chrono;
 
-// For demonstration purpose, we will fill up
-// a vector with random integers and then sort
-// them using sort function. We fill record
-// and print the time required by sort function
+// This code is used to measure the robot moving time and the gripper closing time. 
+
+
 int main()
 {
 
