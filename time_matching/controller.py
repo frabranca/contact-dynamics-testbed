@@ -83,7 +83,8 @@ class Controller:
         Kp_traj = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
         Kd_traj = np.array([0.3, 0., 0., 0., 0., 0., 0.])
 
-        Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        # Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
 
         while not self.loop_closed:
             self.lc.handle()
@@ -147,8 +148,8 @@ class Controller:
                 dq_error = dq_des - self.dq
 
                 # robot acts as a damper to detumble satellite
-                # rcm.tau = Kd_damp * dq_error
-                rcm.tau = np.array([0., 0., 0., 0., 0., 0., 0.])
+                rcm.tau = Kd_damp * dq_error
+                # rcm.tau = np.array([0., 0., 0., 0., 0., 0., 0.])
                 self.lc.publish(self.rcm_channel, rcm.encode())
 
             if self.plot_data:
