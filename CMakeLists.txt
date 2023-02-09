@@ -25,14 +25,9 @@ add_executable(torque_position_control
 add_executable(position_control
 	src/position_control.cpp)
 
-add_executable(pose_motion
-	src/utils/generate_cartesian_pose_motion.cpp)
 
 add_executable(time_measure
 	src/utils/time_measure.cpp)
-
-add_executable(velocity
-	src/utils/generate_joint_velocity_motion.cpp)
 
 add_executable(torque_control
 	time_matching/torque_control.cpp)
@@ -54,10 +49,6 @@ target_link_libraries(echo_robot_state
 target_link_libraries(torque_position_control
 	Franka::Franka
 	lcm)
-
-target_link_libraries(pose_motion
-	Franka::Franka
-	lcm)
 	
 target_link_libraries(time_measure
 	Franka::Franka
@@ -66,6 +57,3 @@ target_link_libraries(position_control
 	Franka::Franka
 	lcm)
 
-target_link_libraries(velocity
-	Franka::Franka
-	lcm)
