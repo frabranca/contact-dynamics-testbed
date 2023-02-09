@@ -5,7 +5,8 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-""" controller.py = sends the commands to the franka robot, gripper and the motor"""
+""" controller.py
+	- sends the commands to the franka robot, gripper and the motor"""
 
 class Controller:
     def __init__(self, rcm_channel, rst_channel, gcm_channel, mcm_channel, plot_data=False, save_data=False):
@@ -18,9 +19,12 @@ class Controller:
         # data lists
         self.t_save          = []
         self.q_save          = []
+        self.q_d_save        = []
         self.dq_save         = []
+        self.dq_d_save       = []
         self.tau_save        = []
-        self.ext_force_save = []
+        self.tau_d_save      = []
+        self.ext_force_save  = []
         self.EFpose_save     = []
 
         # robot states
@@ -59,6 +63,22 @@ class Controller:
 
         if self.save_data:
             self.write_data()
+        
+        if self.plot_data:
+            self.t_save = np.array(self.t_save)
+
+            self.q_save = np.array(self.q_save)
+            self.q_d_save = np.array(self.q_d_save)
+            
+            self.dq_save = np.array(self.dq_save)
+            self.dq_d_save = np.array(self.dq_d_save)
+            
+            self.tau_save = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)
+            self.tau_d_save = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0)
+            
+            self.ext_force_save = np.array(self.ext_force_save)
+            self.EFpose_save = np.array(self.EFpose_save)
+            self.show_plot()
     
     def message(self, string):
         print("-----")
@@ -69,7 +89,7 @@ class Controller:
         self.message("loop started")
 
         gripper_moved = False
-        motor_moved = False
+        motor_moved   = False
 
         # satellite_time = 7.6541
         satellite_time = 7.5
@@ -83,8 +103,8 @@ class Controller:
         Kp_traj = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
         Kd_traj = np.array([0.3, 0., 0., 0., 0., 0., 0.])
 
-        # Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
-        Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
+        Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        # Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
 
         while not self.loop_closed:
             self.lc.handle()
@@ -155,8 +175,11 @@ class Controller:
             if self.plot_data:
                 self.t_save.append(t)
                 self.q_save.append(self.q)
+                self.q_d_save.append(self.q_d)
                 self.dq_save.append(self.dq)
+                self.dq_d_save.append(self.dq_d)
                 self.tau_save.append(self.tau_J)
+                self.tau_d_save.append(self.tau_J_d)
                 self.ext_force_save.append(self.ext_force)
                 self.EFpose_save.append(self.EFpose)
             
@@ -171,7 +194,7 @@ class Controller:
         self.tau_J_d       = rst.tau_J_d
         self.dtau_J        = rst.dtau_J
         self.robot_enable  = rst.robot_enable
-        self.ext_force    = rst.ext_force
+        self.ext_force     = rst.ext_force
         self.EFpose        = rst.EFpose
     
     def move_gripper(self, width, speed, force):
@@ -231,10 +254,10 @@ class Controller:
     
     def show_plot(self):
         labels = ["1", "2", "3", "4", "5", "6", "7"]
-        labels_ef = ["Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]"]
 
         plt.figure()
         plt.plot(self.t_save, self.q_save)
+        plt.plot(self.t_save, self.q_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint position [rad]")
         plt.legend(labels, loc="best")
@@ -243,6 +266,7 @@ class Controller:
 
         plt.figure()
         plt.plot(self.t_save, self.dq_save)
+        plt.plot(self.t_save, self.dq_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint velocity [rad/s]")
         plt.legend(labels, loc="best")
@@ -252,6 +276,7 @@ class Controller:
             
         plt.figure()
         plt.plot(self.t_save, self.tau_save)
+        plt.plot(self.t_save, self.tau_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint torque [Nm]")
         plt.legend(labels, loc="best")
@@ -263,7 +288,7 @@ class Controller:
         plt.plot(self.t_save, self.ext_force_save)
         plt.xlabel("time [s]")
         plt.ylabel("external force on EF")
-        plt.legend(labels_ef, loc="best")
+        plt.legend("Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]", loc="best")
         plt.grid()
         plt.savefig("end_effector_forces.png")
         
@@ -281,13 +306,6 @@ if __name__ == "__main__":
     controller = Controller("ROBOT COMMAND", 
                             "ROBOT STATE",
                             "GRIPPER COMMAND",
-                            "MOTOR COMMAND", plot_data=True, save_data=True)
-    
-    if controller.plot_data==True:
-        controller.t_save = np.array(controller.t_save)
-        controller.q_save = np.array(controller.q_save)
-        controller.dq_save = np.array(controller.dq_save)
-        controller.tau_save = np.array(controller.tau_save) - np.mean(controller.tau_save[0:50], axis=0)
-        controller.ext_force_save = np.array(controller.ext_force_save)
-        controller.EFpose_save = np.array(controller.EFpose_save)
-        controller.show_plot()
+                            "MOTOR COMMAND", 
+                            plot_data=True, 
+                            save_data=True)
