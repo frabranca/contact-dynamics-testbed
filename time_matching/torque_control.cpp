@@ -11,7 +11,18 @@
 #include "robot_messages/frankalcm/robot_command.hpp"
 #include "robot_messages/frankalcm/robot_state.hpp"
 
-// define struct to store received commands from controller
+/** 
+
+torque_control.cpp: this file works as a communication interface to the franka robot.
+
+  - moves robot to initial position before the trajectory is initiated. 
+  - sets collision behaviour
+  - sends states to controller.py on channel "ROBOT STATE"
+  - receives commands from controller.py on channel "ROBOT COMMAND"
+
+*/
+
+// define struct to store received commands from controller.py
 struct command_received{
     std::array<double, 7> tau;
     bool robot_moving;
@@ -36,8 +47,7 @@ class Handler
 
 void message(const char* input){
   std::cout << "-----" << std::endl;
-  std::cout << "torque_control.cpp " << input << std::endl;
-  std::cout << "-----" << std::endl;
+  std::cout << "torque_control.cpp: " << input << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -58,7 +68,7 @@ try {
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);
-    message("Finished moving to initial joint configuration.");
+    message("finished moving to initial position.");
     
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
@@ -80,7 +90,8 @@ try {
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
         
         time += period.toSec();
-            
+        
+        // send robot state for each joint 
         for (int i=0; i<7; i++){
             msg_to_send.q[i] = state.q[i];
             msg_to_send.q_d[i] = state.q_d[i];
@@ -92,10 +103,12 @@ try {
             msg_to_send.dtau_J[i] = state.dtau_J[i];
         }
         
+        // send measured external forces applied on the end effector
         for (int i=0; i<6; i++){
             msg_to_send.ext_force[i] = state.O_F_ext_hat_K[i];
         }
         
+        // send end effector position 
         msg_to_send.EFpose[0] = state.O_T_EE[12];
         msg_to_send.EFpose[1] = state.O_T_EE[13];
         msg_to_send.EFpose[2] = state.O_T_EE[14];

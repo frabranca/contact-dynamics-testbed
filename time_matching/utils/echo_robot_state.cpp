@@ -5,9 +5,8 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
-/**
- * echo_robot_state.cpp
- * used to read the robot state (non real-time).
+/*
+  echo_robot_state.cpp: used to read the robot state (non real-time).
  */
 
 int main(int argc, char** argv) {

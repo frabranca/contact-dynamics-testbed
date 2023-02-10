@@ -3,15 +3,16 @@ from motor_driver.canmotorlib import CanMotorController
 import matplotlib.pyplot as plt
 import numpy as np
 
+""" motor_friction.py: this code was used to find a suitable 
+                        coulomb friction coefficient for friction compensation"""
+
 time_ = []
 pos_ = []
 vel_ = []
 tau_ = []
 vel_filter = []
 
-cf = 0.095 # v = 20
-# cf = 0.096
-# cf = 0.01
+cf = 0.095
 
 def tau_friction(v):
     return cf*np.arctan(100*v)
@@ -33,7 +34,6 @@ while (time.time()-start) < 15.:
     if (time.time()-start) < 3.:
         torque = tau_friction(vel_meas) + tau_des
         pos_meas, vel_meas, tau_meas = motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
-    # pos, vel, tau = motor.send_deg_command(0, 0, 0, 0, 0)
     else:
         torque = tau_friction(vel_meas)
         pos_meas, vel_meas, tau_meas = motor.send_deg_command(0, 0, 0, 0, torque)
@@ -52,7 +52,6 @@ while (time.time()-start) < 15.:
 
     vel_filter.append(vel_filtered)
     i+=1
-
 
 
 motor.disable_motor()

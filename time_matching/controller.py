@@ -5,8 +5,16 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-""" controller.py
-	- sends the commands to the franka robot, gripper and the motor"""
+""" 
+controller.py: main controller.
+
+	- sends commands to 
+        - torque_control.cpp (real-time "ROBOT COMMMAND")
+        - gripper_control.cpp (non-real-time "GRIPPER COMMAND")
+        - motor_controller.py (non-real-time "MOTOR COMMAND")
+    - receives the state from torque_control.cpp (real-time "ROBOT STATE") 
+
+"""
 
 class Controller:
     def __init__(self, rcm_channel, rst_channel, gcm_channel, mcm_channel, plot_data=False, save_data=False):
@@ -28,20 +36,20 @@ class Controller:
         self.EFpose_save     = []
 
         # robot states
-        self.q = 0
-        self.q_d = 0
-        self.dq = 0
-        self.dq_d = 0
-        self.ddq_d = 0
-        self.tau_J = 0
-        self.tau_J_d = 0
-        self.dtau_J = 0
+        self.q            = 0
+        self.q_d          = 0
+        self.dq           = 0
+        self.dq_d         = 0
+        self.ddq_d        = 0
+        self.tau_J        = 0
+        self.tau_J_d      = 0
+        self.dtau_J       = 0
         self.robot_enable = False
-        self.ext_force = 0
-        self.EFpose = 0
+        self.ext_force    = 0
+        self.EFpose       = 0
 
         # gripper states
-        self.width = 0
+        self.width           = 0
         self.gripper_enabled = False
 
         # define lcm channels
@@ -52,32 +60,28 @@ class Controller:
 
         # subscribe to channels
         self.lc = lcm.LCM()
-        self.robot_sub   = self.lc.subscribe(self.rst_channel, self.robot_handler)
+        self.robot_subscription   = self.lc.subscribe(self.rst_channel, self.robot_handler)
 
         # actions
-        self.lc.handle()
+        self.lc.handle() # waiting for enabling message from torque_control.cpp
         if self.robot_enable == True:
             self.control_loop()
         
-        self.lc.unsubscribe(self.robot_sub)
+        self.lc.unsubscribe(self.robot_subscription)
 
         if self.save_data:
             self.write_data()
         
         if self.plot_data:
-            self.t_save = np.array(self.t_save)
-
-            self.q_save = np.array(self.q_save)
-            self.q_d_save = np.array(self.q_d_save)
-            
-            self.dq_save = np.array(self.dq_save)
-            self.dq_d_save = np.array(self.dq_d_save)
-            
-            self.tau_save = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)
-            self.tau_d_save = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0)
-            
+            self.t_save         = np.array(self.t_save)
+            self.q_save         = np.array(self.q_save)
+            self.q_d_save       = np.array(self.q_d_save)
+            self.dq_save        = np.array(self.dq_save)
+            self.dq_d_save      = np.array(self.dq_d_save)
+            self.tau_save       = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)     # normalize measured torque
+            self.tau_d_save     = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0) # normalize desired torque
             self.ext_force_save = np.array(self.ext_force_save)
-            self.EFpose_save = np.array(self.EFpose_save)
+            self.EFpose_save    = np.array(self.EFpose_save)
             self.show_plot()
     
     def message(self, string):
@@ -86,30 +90,39 @@ class Controller:
 
     def control_loop(self):
         start = time.time()
-        self.message("loop started")
 
         gripper_moved = False
         motor_moved   = False
 
-        # satellite_time = 7.6541
+        # adjustable parameters
         satellite_time = 7.5
-        motor_time = 1.
-        robot_time = 1. + satellite_time - 3.#1.35439
-        gripper_time = 1. + satellite_time # - 0.6523
+        motor_time     = 1.
+        robot_time     = 1. + satellite_time - 3. # adjust robot starting time to reach contact point
+        gripper_time   = 1. + satellite_time      # adjust gripper starting time to reach contact point
+        
+        q_fix = -0.02 # adjust position at the end of the trajectory to reach contact point
+        gripper_width = 0.02
+        gripper_speed = 10.0
+        gripper_force = 60.0
         
         # controller gains  
+        
+        """ waiting phase """
         Kd_wait = np.array([1., 1., 1., 1., 1., 1., 1.])
 
+        """ trajectory phase """
         Kp_traj = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
         Kd_traj = np.array([0.3, 0., 0., 0., 0., 0., 0.])
 
+        """ damping phase """
         Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
         # Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
+
+        self.message("loop started")
 
         while not self.loop_closed:
             self.lc.handle()
             rcm = robot_command()
-            gcm = gripper_command()
             mcm = motor_command()
 
             # control logic --------------------------------------------------
@@ -125,13 +138,13 @@ class Controller:
                 q_error  = q_des - self.q
                 dq_error = dq_des - self.dq
 
-                # robot acts as a damper to detumble satellite
+                # robot acts as a damper hold the position before the trajectory is followed
                 rcm.tau =  Kd_wait * dq_error
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
             # TRAJECTORY PHASE
             if (t >= robot_time) and (t < robot_time + 2.0):
-                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) - 0.02
+                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + q_fix
                 dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
 
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])
@@ -148,7 +161,7 @@ class Controller:
             # GRIPPER COMMAND
             if (time.time()-start) >= gripper_time and gripper_moved == False:
                 gripper_moved = True
-                self.move_gripper(0.02, 10.0, 60.0)
+                self.move_gripper(gripper_width, gripper_speed, gripper_force)
             
             # MOTOR COMMAND
             if (time.time()-start) >= motor_time and motor_moved == False:
@@ -288,7 +301,7 @@ class Controller:
         plt.plot(self.t_save, self.ext_force_save)
         plt.xlabel("time [s]")
         plt.ylabel("external force on EF")
-        # plt.legend("Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]", loc="best")
+        plt.legend(["Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]"], loc="best")
         plt.grid()
         plt.savefig("end_effector_forces.png")
         

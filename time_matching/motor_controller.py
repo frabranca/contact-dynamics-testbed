@@ -5,17 +5,28 @@ from motor_driver.canmotorlib import CanMotorController
 import matplotlib.pyplot as plt
 from motor_messages.motorlcm import motor_command
 
+""" 
+
+motor_controller.py: this file works as a communication interface to the motor.
+
+    - receives enabling message from controller.py from channel "MOTOR COMMAND"
+    - spins the motor at constant speed for 5 seconds with torque commands
+    - switches to friction compensation for the remaining time
+
+"""
+
 class motor_controller:
     def __init__(self, can_port, motor_id, cf, velocity, motor_type="AK80_6_V1p1", channel = "MOTOR COMMAND"):
-        self.cf = cf
-        self.velocity = velocity
-        self.channel = channel
 
-        self.t_save   = []
-        self.pos_save = []
-        self.vel_save = []
+        self.cf       = cf       # coulomb friction coefficient
+        self.velocity = velocity # satellite rotational velocity
+        self.channel  = channel
+
+        self.t_save          = []
+        self.pos_save        = []
+        self.vel_save        = []
         self.vel_filter_save = []
-        self.cur_save = []
+        self.tau_save        = []
 
         self.lc = lcm.LCM()
         self.lc.subscribe(self.channel, self.motor_handler)
@@ -27,7 +38,6 @@ class motor_controller:
         self.loop()
         self.show_plot()
 
-        self.vel_save = np.array(self.vel_save)
         self.write_data()
     
     def friction_compensation(self, v):
@@ -36,26 +46,29 @@ class motor_controller:
     def loop(self):
         start = time.time()
 
+        # control gains
         Kp = 0
         Kd = 5
 
+        # desired position, velocity and torque
         pos_des = 0
         vel_des = self.velocity
         tau_des = 0.15
 
+        # measured position, velocity, torque
         pos_meas = 0
         vel_meas = 0
-        cur_meas = 0
+        tau_meas = 0
 
         i = 0
 
         while (time.time() - start) < 10:
             if (time.time() - start) >= 5.:
                 torque = self.friction_compensation(vel_meas)
-                pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(0, 0, 0, 0, torque)
+                pos_meas, vel_meas, tau_meas = self.motor.send_deg_command(0, 0, 0, 0, torque)
             else:
                 torque = self.friction_compensation(vel_meas) + tau_des
-                pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
+                pos_meas, vel_meas, tau_meas = self.motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
             
             filter = 100
             filter_size = filter-1
@@ -70,7 +83,7 @@ class motor_controller:
             self.t_save.append(time.time()-start)
             self.pos_save.append(pos_meas)
             self.vel_save.append(vel_meas)
-            self.cur_save.append(cur_meas)
+            self.tau_save.append(tau_meas)
 
             
         print("Disabling Motors...")
@@ -87,6 +100,7 @@ class motor_controller:
         plt.plot(self.t_save, self.vel_filter_save)
         plt.xlabel("time [s]")
         plt.ylabel("velocity [deg/s]")
+        plt.legend(["measured", "filtered"], loc='best')
         plt.grid()
         plt.savefig("satellite_velocity.png")
         plt.show()
@@ -94,7 +108,7 @@ class motor_controller:
     def write_data(self):
         output = open("satellite_velocity", "w")
         output.truncate()
-        output.write("time" + " " + "velocity" + " " + "velocity_filtered" +"\n")
+        output.write("time" + " " + "velocity" + " " + "velocity_filtered" + "\n")
         for i in range(len(self.vel_save)):
             output.write(str(self.t_save[i]) + ' ' + ' ' + str(self.vel_save[i]) + ' ' + str(self.vel_filter_save[i]) + '\n')
         output.close()

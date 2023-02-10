@@ -14,7 +14,7 @@
 using namespace std;
 using namespace std::chrono;
 
-// This code is used to measure the robot moving time and the gripper closing time. 
+// time_measure.cpp: used to measure the robot moving time and the gripper closing time. 
 
 
 int main()
