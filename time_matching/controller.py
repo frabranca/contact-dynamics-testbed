@@ -131,7 +131,7 @@ class Controller:
             
             # TRAJECTORY PHASE
             if (t >= robot_time) and (t < robot_time + 2.0):
-                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + 0.02
+                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) - 0.02
                 dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
 
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])
@@ -288,7 +288,7 @@ class Controller:
         plt.plot(self.t_save, self.ext_force_save)
         plt.xlabel("time [s]")
         plt.ylabel("external force on EF")
-        plt.legend("Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]", loc="best")
+        # plt.legend("Fx [N]", "Fy [N]", "Fz [N]", "Tx [Nm]", "Ty [Nm]", "Tz [Nm]", loc="best")
         plt.grid()
         plt.savefig("end_effector_forces.png")
         

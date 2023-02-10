@@ -49,7 +49,7 @@ class motor_controller:
 
         i = 0
 
-        while (time.time() - start) < 20:
+        while (time.time() - start) < 10:
             if (time.time() - start) >= 5.:
                 torque = self.friction_compensation(vel_meas)
                 pos_meas, vel_meas, cur_meas = self.motor.send_deg_command(0, 0, 0, 0, torque)
@@ -82,6 +82,7 @@ class motor_controller:
     
     def show_plot(self):
         plt.figure()
+        plt.title("cf = " + str(self.cf))
         plt.plot(self.t_save, self.vel_save)
         plt.plot(self.t_save, self.vel_filter_save)
         plt.xlabel("time [s]")
@@ -93,11 +94,12 @@ class motor_controller:
     def write_data(self):
         output = open("satellite_velocity", "w")
         output.truncate()
+        output.write("time" + " " + "velocity" + " " + "velocity_filtered" +"\n")
         for i in range(len(self.vel_save)):
-            output.write(str(self.t_save[i]) + ' ' + ' ' + str(self.vel_save[i]) + str(self.vel_filter_save[i]) + '\n')
+            output.write(str(self.t_save[i]) + ' ' + ' ' + str(self.vel_save[i]) + ' ' + str(self.vel_filter_save[i]) + '\n')
         output.close()
 
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 3
-    motor_controller(can_port, motor_id, 0.095, 20)
+    motor_controller(can_port, motor_id, 0.08, 20)
