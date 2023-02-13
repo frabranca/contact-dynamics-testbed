@@ -3,4 +3,5 @@ package motorlcm;
 struct motor_state
 {
    double position;
+   double velocity;
 }

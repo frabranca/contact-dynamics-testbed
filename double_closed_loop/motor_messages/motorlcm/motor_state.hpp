@@ -18,6 +18,8 @@ class motor_state
     public:
         double     position;
 
+        double     velocity;
+
     public:
         /**
          * Encode a message into binary form.
@@ -117,6 +119,9 @@ int motor_state::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->position, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->velocity, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -127,6 +132,9 @@ int motor_state::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->position, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->velocity, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -134,12 +142,13 @@ int motor_state::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
     enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 uint64_t motor_state::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0xe743566f594023fdLL;
+    uint64_t hash = 0x1a4005b7d5f2bfb5LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

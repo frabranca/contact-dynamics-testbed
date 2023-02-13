@@ -73,21 +73,22 @@ class motor_controller:
                 torque = self.friction_compensation(vel_meas) + tau_des
                 pos_meas, vel_meas, tau_meas = self.motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
             
-            mst.position = pos_meas
-            self.lc.publish(self.mst_channel, mst.encode())
-
             filter = 100
             filter_size = filter-1
             if i > filter_size+1:
                 vel_filtered = sum(self.vel_save[i-filter_size:i+1]) / (filter_size+1)
             else:
                 vel_filtered = 0
+            
+            mst.position = np.cos(np.radians(pos_meas))
+            mst.velocity = vel_filtered
+            self.lc.publish(self.mst_channel, mst.encode())
 
             self.vel_filter_save.append(vel_filtered)
             i+=1
 
             self.t_save.append(time.time()-start)
-            self.pos_save.append(pos_meas)
+            self.pos_save.append(np.cos(np.radians(pos_meas)))
             self.vel_save.append(vel_meas)
             self.tau_save.append(tau_meas)
 
@@ -109,6 +110,7 @@ class motor_controller:
         plt.legend(["measured", "filtered"], loc='best')
         plt.grid()
         plt.savefig("satellite_velocity.png")
+
         plt.show()
     
     def write_data(self):
@@ -122,4 +124,4 @@ class motor_controller:
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 3
-    motor_controller(can_port, motor_id, 0.08, 20)
+    motor_controller(can_port, motor_id, 0.09, 20)

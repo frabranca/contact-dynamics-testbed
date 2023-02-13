@@ -35,6 +35,9 @@ class Controller:
         self.ext_force_save  = []
         self.EFpose_save     = []
 
+        self.sat_position_save = []
+        self.sat_velocity_save = []
+
         # robot states
         self.q            = 0
         self.q_d          = 0
@@ -49,7 +52,8 @@ class Controller:
         self.EFpose       = 0
 
         # motor states
-        self.position = 0
+        self.sat_position = 0
+        self.sat_velocity = 0
 
         # define lcm channels
         self.rcm_channel = rcm_channel
@@ -74,15 +78,8 @@ class Controller:
             self.write_data()
         
         if self.plot_data:
-            self.t_save         = np.array(self.t_save)
-            self.q_save         = np.array(self.q_save)
-            self.q_d_save       = np.array(self.q_d_save)
-            self.dq_save        = np.array(self.dq_save)
-            self.dq_d_save      = np.array(self.dq_d_save)
-            self.tau_save       = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)     # normalize measured torque
-            self.tau_d_save     = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0) # normalize desired torque
-            self.ext_force_save = np.array(self.ext_force_save)
-            self.EFpose_save    = np.array(self.EFpose_save)
+            self.tau_save   = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)     # normalize measured torque
+            self.tau_d_save = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0) # normalize desired torque
             self.show_plot()
     
     def message(self, string):
@@ -92,6 +89,7 @@ class Controller:
     def control_loop(self):
         start = time.time()
 
+        robot_moved   = False
         gripper_moved = False
         motor_moved   = False
 
@@ -101,7 +99,7 @@ class Controller:
         robot_time     = 1. + satellite_time - 3. # adjust robot starting time to reach contact point
         gripper_time   = 1. + satellite_time      # adjust gripper starting time to reach contact point
         
-        q_fix = -0.02 # adjust position at the end of the trajectory to reach contact point
+        q_fix = -0.05 # adjust position at the end of the trajectory to reach contact point
         gripper_width = 0.02
         gripper_speed = 10.0
         gripper_force = 60.0
@@ -130,8 +128,6 @@ class Controller:
             t = time.time() - start
             t_robot = t - robot_time
             
-            print(self.positon)
-
             # WAITING PHASE
             if (t <= robot_time):
                 rcm.robot_moving = False
@@ -146,7 +142,9 @@ class Controller:
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
             # TRAJECTORY PHASE
-            if (t >= robot_time) and (t < robot_time + 2.0):
+            # if (t >= robot_time) and (t < robot_time + 2.0):
+            if self.sat_position >= -0.75 and self.sat_position <= 0.95:
+    
                 q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + q_fix
                 dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
 
@@ -198,6 +196,8 @@ class Controller:
                 self.tau_d_save.append(self.tau_J_d)
                 self.ext_force_save.append(self.ext_force)
                 self.EFpose_save.append(self.EFpose)
+                self.sat_position_save.append(self.sat_position)
+                self.sat_velocity_save.append(self.sat_velocity)
             
     def robot_handler(self, channel, data):
         rst = robot_state.decode(data)
@@ -215,7 +215,8 @@ class Controller:
     
     def motor_handler(self, channel, data):
         mst = motor_state.decode(data)
-        self.position = mst.position
+        self.sat_position = mst.position
+        self.sat_velocity = mst.velocity
     
     def move_gripper(self, width, speed, force):
         gcm = gripper_command()
@@ -292,7 +293,6 @@ class Controller:
         plt.legend(labels, loc="best")
         plt.grid()
         plt.savefig("joint_velocities.png")
-
             
         plt.figure()
         plt.plot(self.t_save, self.tau_save)
@@ -302,7 +302,6 @@ class Controller:
         plt.legend(labels, loc="best")
         plt.grid()
         plt.savefig("joint_torques.png")
-
 
         plt.figure()
         plt.plot(self.t_save, self.ext_force_save)
@@ -318,6 +317,13 @@ class Controller:
         plt.ylabel("EF position [m]")
         plt.legend(['x', 'y', 'z'], loc="best")
         plt.savefig("end_effector_position.png")
+        plt.grid()
+
+        plt.figure()
+        plt.plot(self.t_save, self.sat_position_save)
+        plt.xlabel("time [s]")
+        plt.ylabel("satellite position [deg]")
+        plt.savefig("satellite_position.png")
         plt.grid()
 
         plt.show()

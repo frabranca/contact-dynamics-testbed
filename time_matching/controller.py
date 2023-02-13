@@ -48,10 +48,6 @@ class Controller:
         self.ext_force    = 0
         self.EFpose       = 0
 
-        # gripper states
-        self.width           = 0
-        self.gripper_enabled = False
-
         # define lcm channels
         self.rcm_channel = rcm_channel
         self.rst_channel = rst_channel

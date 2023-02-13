@@ -49,13 +49,8 @@ int main(int argc, char** argv) {
   try {
     // if gripper is fully open send message to controller to say that homing is complete
     franka::Gripper gripper("192.168.131.40");
-    franka::GripperState gripper_state = gripper.readOnce();
     gripper.homing();
     message("homing done");
-
-    //msg_to_send.gripper_enabled = true;
-    //lcm.publish("GRIPPER STATE", &msg_to_send);
-    //message("gripper enabled sent");
 
     // wait for message to use gripper
     lcm.handle();
