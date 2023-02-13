@@ -1,8 +1,13 @@
+/build
+
 /src/robot_messages/frankalcm
 /src/motor_messages/motorlcm
-/build
 /src/extra_stuff
+
 /time_matching/robot_messages/frankalcm
 /time_matching/motor_messages/motorlcm
 /time_matching/extra_stuff
+
+/double_closed_loop/robot_messages/frankalcm
+/double_closed_loop/motor_messages/motorlcm
 
