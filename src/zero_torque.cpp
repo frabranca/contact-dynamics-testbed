@@ -21,7 +21,7 @@ try {
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     MotionGenerator motion_generator(0.5, q_goal);
 
-    //robot.control(motion_generator);
+    robot.control(motion_generator);
     message("Finished moving to initial joint configuration.");
     
     // Set additional parameters always before the control loop, NEVER in the control loop!
@@ -51,7 +51,7 @@ try {
     };
 
     // Start real-time control loop.
-    robot.control(motion_generator);
+    robot.control(torque_control);
 
   } catch (const franka::Exception& ex) {
     std::cerr << ex.what() << std::endl;

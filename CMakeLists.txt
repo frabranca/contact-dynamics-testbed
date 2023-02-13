@@ -16,8 +16,8 @@ add_executable(gripper_control
 add_executable(echo_robot_state
 	src/utils/echo_robot_state.cpp)
 	
-add_executable(torque_position_control 
-	src/torque_position_control.cpp)
+add_executable(zero_torque 
+	src/zero_torque.cpp)
 
 add_executable(position_control
 	src/position_control.cpp)
@@ -42,7 +42,7 @@ target_link_libraries(gripper_control
 target_link_libraries(echo_robot_state
 	Franka::Franka)
 
-target_link_libraries(torque_position_control
+target_link_libraries(zero_torque
 	Franka::Franka
 	lcm)
 	
