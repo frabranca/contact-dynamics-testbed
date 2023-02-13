@@ -10,7 +10,6 @@
 #include "utils/common_functions.cpp"
 #include <lcm/lcm-cpp.hpp>
 #include "robot_messages/frankalcm/gripper_command.hpp"
-#include "robot_messages/frankalcm/gripper_state.hpp"
 
 // define struct to store received commands from controller
 struct command_received{
@@ -43,7 +42,6 @@ int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
 
   lcm::LCM lcm;
-  frankalcm::gripper_state msg_to_send;
 
   Handler handlerObject;
   lcm.subscribe("GRIPPER COMMAND", &Handler::handleMessage, &handlerObject);

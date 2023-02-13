@@ -7,7 +7,7 @@ find_package(Franka REQUIRED)
 find_package(lcm REQUIRED)
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/time_matching
 )
 
 add_executable(gripper_control
@@ -17,7 +17,7 @@ add_executable(echo_robot_state
 	src/utils/echo_robot_state.cpp)
 	
 add_executable(zero_torque 
-	src/zero_torque.cpp)
+	time_matching/utils/zero_torque.cpp)
 
 add_executable(position_control
 	src/position_control.cpp)

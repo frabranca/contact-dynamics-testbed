@@ -6,8 +6,12 @@
 #include <franka/robot.h>
 #include "utils/common_functions.cpp"
 
+/*
+  zero_torque.cpp: used to move the robot by hand. Only zero torque commands are sent.
+ */
+
 void message(const char* input){
-  std::cout << "torque_control.cpp " << input << std::endl;
+  std::cout << "zero_torque.cpp " << input << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -18,7 +22,9 @@ try {
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    // std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    std::array<double, 7> q_goal = {{0.5, 0.0, 0.0, -3 * M_PI_4, -M_PI_2, M_PI_2, M_PI_2}};
+    
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);

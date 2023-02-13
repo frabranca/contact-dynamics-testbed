@@ -9,8 +9,8 @@
 
 #include "common_functions.cpp"
 
-// test to grasp metal rod with the 3D printed gripper clamp
-// the grasping position can be found by moving the franka by hand and running the code echo_robot_state.cpp
+/* grasp_rod.cpp: used to test the 3D printer gripper. 
+*/
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
