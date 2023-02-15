@@ -1,9 +1,0 @@
-package frankalcm;
-
-struct robot_command
-{ 
-    double tau[7];
-    boolean robot_moving;
-}
-
-

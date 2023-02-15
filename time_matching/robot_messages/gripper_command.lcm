@@ -1,8 +1,0 @@
-package frankalcm;
-
-struct gripper_command
-{
-   double width;
-   double speed;
-   double force;
-}

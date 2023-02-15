@@ -1,9 +1,14 @@
 import lcm
-from robot_messages.frankalcm import robot_command, robot_state, gripper_command
-from motor_messages.motorlcm import motor_command, motor_state
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import sys
+sys.path.insert(0, os.path.expanduser('~/contact-dynamics-testbed'))
+
+from franka_communication_interface.robot_messages.frankalcm import robot_command, robot_state, gripper_command
+from motor_messages.motorlcm import motor_command
+
 
 """ 
 controller.py: main controller.
