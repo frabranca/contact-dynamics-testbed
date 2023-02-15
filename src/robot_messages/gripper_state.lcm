@@ -1,7 +1,0 @@
-package frankalcm;
-
-struct gripper_state
-{
-   double width;
-   boolean gripper_enabled;
-}
