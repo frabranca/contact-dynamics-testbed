@@ -94,9 +94,9 @@ class Controller:
     def control_loop(self):
         start = time.time()
 
-        robot_moved   = False
-        gripper_moved = False
-        motor_moved   = False
+        robot_moved    = False
+        gripper_moved  = False
+        motor_moved    = False
 
         # adjustable parameters
         satellite_time = 7.5
@@ -123,7 +123,7 @@ class Controller:
         # Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
 
         self.message("loop started")
-        t_ = 0
+        
         while not self.loop_closed:
             self.lc.handle()
             rcm = robot_command()
@@ -148,11 +148,14 @@ class Controller:
             
             # TRAJECTORY PHASE
             # if (t >= robot_time) and (t < robot_time + 2.0):
+            if self.sat_position <= -0.75 and robot_moved == False:
+                t_robot = time.time() - start
+                robot_moved = True
             
             if self.sat_position <= -0.75 and  self.sat_position >= -1.0:
-                t_ += 0.001
-                q1_des  = 0.5 - 0.5*t_ + 0.5 / np.pi *np.sin(np.pi * t_) + q_fix
-                dq1_des = -0.5 + 0.5*np.cos(np.pi * t_)
+
+                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + q_fix
+                dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
 
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])
                 dq_des = np.array([dq1_des, 0., 0., 0., 0., 0., 0.])
@@ -161,10 +164,6 @@ class Controller:
                 dq_error = dq_des - self.dq
 
                 rcm.tau = Kp_traj * q_error + Kd_traj * dq_error
-
-                if q1_des == -0.5 + q_fix:
-                    robot_moved = True
-                print(t_)
                 rcm.robot_moving = True
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
