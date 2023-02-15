@@ -7,17 +7,18 @@ import sys
 sys.path.insert(0, os.path.expanduser('~/contact-dynamics-testbed'))
 
 from franka_interface.robot_messages.frankalcm import robot_command, robot_state, gripper_command
-from motor_interface.motor_messages.motorlcm import motor_command
-
+from motor_interface.motor_messages.motorlcm import motor_command, motor_state
 
 """ 
 controller.py: main controller.
 
-	- sends commands to 
+	- sends commands to: 
         - torque_control.cpp (real-time "ROBOT COMMMAND")
         - gripper_control.cpp (non-real-time "GRIPPER COMMAND")
         - motor_controller.py (non-real-time "MOTOR COMMAND")
-    - receives the state from torque_control.cpp (real-time "ROBOT STATE") 
+    - receives the state from:
+        - torque_control.cpp (real-time "ROBOT STATE") 
+        - motor_controller.py (rel-time "MOTOR STATE")
 
 """
 
@@ -123,13 +124,13 @@ class Controller:
         # Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
 
         self.message("loop started")
-        
+
         while not self.loop_closed:
             self.lc.handle()
             rcm = robot_command()
             mcm = motor_command()
 
-            # control logic --------------------------------------------------
+            # control logic -----------------------------------------------------------------------
             t = time.time() - start
             t_robot = t - robot_time
             
@@ -146,12 +147,12 @@ class Controller:
                 rcm.tau =  Kd_wait * dq_error
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
-            # TRAJECTORY PHASE
-            # if (t >= robot_time) and (t < robot_time + 2.0):
+            # set start point for robot trajectory phase
             if self.sat_position <= -0.75 and robot_moved == False:
                 t_robot = time.time() - start
                 robot_moved = True
-            
+
+            # TRAJECTORY PHASE
             if self.sat_position <= -0.75 and  self.sat_position >= -1.0:
 
                 q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + q_fix
