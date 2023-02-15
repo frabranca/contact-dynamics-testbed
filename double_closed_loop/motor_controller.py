@@ -3,7 +3,11 @@ import lcm
 import numpy as np
 from motor_driver.canmotorlib import CanMotorController
 import matplotlib.pyplot as plt
-from motor_messages.motorlcm import motor_command, motor_state
+import os
+import sys
+sys.path.insert(0, os.path.expanduser('~/contact-dynamics-testbed'))
+
+from motor_interface.motor_messages.motorlcm import motor_command, motor_state
 
 """ 
 

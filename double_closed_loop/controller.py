@@ -6,8 +6,8 @@ import os
 import sys
 sys.path.insert(0, os.path.expanduser('~/contact-dynamics-testbed'))
 
-from franka_communication_interface.robot_messages.frankalcm import robot_command, robot_state, gripper_command
-from motor_messages.motorlcm import motor_command
+from franka_interface.robot_messages.frankalcm import robot_command, robot_state, gripper_command
+from motor_interface.motor_messages.motorlcm import motor_command
 
 
 """ 

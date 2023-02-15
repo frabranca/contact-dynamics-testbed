@@ -1,6 +1,0 @@
-package motorlcm;
-
-struct motor_command
-{
-   boolean motor_enable;
-}
