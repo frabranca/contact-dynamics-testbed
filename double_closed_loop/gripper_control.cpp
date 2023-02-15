@@ -28,6 +28,7 @@ class Handler
         void handleMessage(const lcm::ReceiveBuffer* rbuf,
                 const std::string& chan, 
                 const frankalcm::gripper_command* msg_received){
+              std::cout << "waiting ..." << std::endl;
               gcm_struct.width = msg_received->width;
               gcm_struct.speed = msg_received->speed;
               gcm_struct.force = msg_received->force;
@@ -49,13 +50,8 @@ int main(int argc, char** argv) {
   try {
     // if gripper is fully open send message to controller to say that homing is complete
     franka::Gripper gripper("192.168.131.40");
-    franka::GripperState gripper_state = gripper.readOnce();
     gripper.homing();
     message("homing done");
-
-    //msg_to_send.gripper_enabled = true;
-    //lcm.publish("GRIPPER STATE", &msg_to_send);
-    //message("gripper enabled sent");
 
     // wait for message to use gripper
     lcm.handle();

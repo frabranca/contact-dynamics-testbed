@@ -10,14 +10,13 @@ except ImportError:
 import struct
 
 class gripper_command(object):
-    __slots__ = ["gripper_enable", "width", "speed", "force"]
+    __slots__ = ["width", "speed", "force"]
 
-    __typenames__ = ["boolean", "double", "double", "double"]
+    __typenames__ = ["double", "double", "double"]
 
-    __dimensions__ = [None, None, None, None]
+    __dimensions__ = [None, None, None]
 
     def __init__(self):
-        self.gripper_enable = False
         self.width = 0.0
         self.speed = 0.0
         self.force = 0.0
@@ -29,7 +28,7 @@ class gripper_command(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">bddd", self.gripper_enable, self.width, self.speed, self.force))
+        buf.write(struct.pack(">ddd", self.width, self.speed, self.force))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -43,15 +42,13 @@ class gripper_command(object):
 
     def _decode_one(buf):
         self = gripper_command()
-        self.gripper_enable = bool(struct.unpack('b', buf.read(1))[0])
         self.width, self.speed, self.force = struct.unpack(">ddd", buf.read(24))
         return self
     _decode_one = staticmethod(_decode_one)
 
-    _hash = None
     def _get_hash_recursive(parents):
         if gripper_command in parents: return 0
-        tmphash = (0x1d55afa15cb1643c) & 0xffffffffffffffff
+        tmphash = (0xf0d6ebefec5902ae) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
@@ -62,4 +59,8 @@ class gripper_command(object):
             gripper_command._packed_fingerprint = struct.pack(">Q", gripper_command._get_hash_recursive([]))
         return gripper_command._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", gripper_command._get_packed_fingerprint())[0]
 

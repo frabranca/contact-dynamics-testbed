@@ -65,7 +65,7 @@ class motor_controller:
         # index for filtered measurements
         i = 0
 
-        while (time.time() - start) < 10:
+        while (time.time() - start) < 20:
             if (time.time() - start) >= 5.:
                 torque = self.friction_compensation(vel_meas)
                 pos_meas, vel_meas, tau_meas = self.motor.send_deg_command(0, 0, 0, 0, torque)
@@ -124,4 +124,4 @@ class motor_controller:
 if __name__=="__main__":
     can_port = 'can0'
     motor_id = 3
-    motor_controller(can_port, motor_id, 0.09, 20)
+    motor_controller(can_port, motor_id, 0.088, 20)

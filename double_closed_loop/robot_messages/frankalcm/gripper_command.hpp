@@ -16,8 +16,6 @@ namespace frankalcm
 class gripper_command
 {
     public:
-        int8_t     gripper_enable;
-
         double     width;
 
         double     speed;
@@ -120,9 +118,6 @@ int gripper_command::_encodeNoHash(void *buf, int offset, int maxlen) const
 {
     int pos = 0, tlen;
 
-    tlen = __boolean_encode_array(buf, offset + pos, maxlen - pos, &this->gripper_enable, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
@@ -139,9 +134,6 @@ int gripper_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 {
     int pos = 0, tlen;
 
-    tlen = __boolean_decode_array(buf, offset + pos, maxlen - pos, &this->gripper_enable, 1);
-    if(tlen < 0) return tlen; else pos += tlen;
-
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->width, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
@@ -157,7 +149,6 @@ int gripper_command::_decodeNoHash(const void *buf, int offset, int maxlen)
 int gripper_command::_getEncodedSizeNoHash() const
 {
     int enc_size = 0;
-    enc_size += __boolean_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
@@ -166,7 +157,7 @@ int gripper_command::_getEncodedSizeNoHash() const
 
 uint64_t gripper_command::_computeHash(const __lcm_hash_ptr *)
 {
-    uint64_t hash = 0x1d55afa15cb1643cLL;
+    uint64_t hash = 0xf0d6ebefec5902aeLL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

@@ -7,7 +7,7 @@ find_package(Franka REQUIRED)
 find_package(lcm REQUIRED)
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/time_matching
+  ${CMAKE_SOURCE_DIR}/double_closed_loop
 )
 
 add_executable(torque_control
