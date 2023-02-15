@@ -14,6 +14,7 @@ from motor_interface.motor_messages.motorlcm import motor_command, motor_state
 motor_controller.py: this file works as a communication interface to the motor.
 
     - receives enabling message from controller.py from channel "MOTOR COMMAND"
+    - sends motor position to channel "MOTOR STATE"
     - spins the motor at constant speed for 5 seconds with torque commands
     - switches to friction compensation for the remaining time
 
@@ -42,7 +43,6 @@ class motor_controller:
         self.lc.handle()
         self.loop()
         self.show_plot()
-
         self.write_data()
     
     def friction_compensation(self, v):
@@ -95,7 +95,6 @@ class motor_controller:
             self.pos_save.append(np.cos(np.radians(pos_meas)))
             self.vel_save.append(vel_meas)
             self.tau_save.append(tau_meas)
-
             
         print("Disabling Motors...")
         self.motor.disable_motor()
