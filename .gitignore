@@ -1,9 +1,6 @@
 /build
 /src
-/franka_communication_interface/robot_messages/frankalcm
-
+/franka_interface/robot_messages/frankalcm
+/motor_interface/motor_messages/motorlcm
 /time_matching/extra_stuff
-
-/time_matching/motor_messages/motorlcm
-/double_closed_loop/motor_messages/motorlcm
 
