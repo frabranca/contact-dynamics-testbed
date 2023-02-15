@@ -33,12 +33,6 @@ target_link_libraries(zero_torque
 	Franka::Franka
 	lcm)
 
-add_executable(position_control
-	src/position_control.cpp)
-target_link_libraries(position_control
-	Franka::Franka
-	lcm)
-
 add_executable(time_measure
 	franka_interface/utils/time_measure.cpp)
 target_link_libraries(time_measure
