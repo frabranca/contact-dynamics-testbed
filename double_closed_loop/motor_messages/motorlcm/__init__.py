@@ -4,4 +4,3 @@ DO NOT MODIFY BY HAND!!!!
 """
 
 from .motor_command import motor_command
-from .motor_state import motor_state
