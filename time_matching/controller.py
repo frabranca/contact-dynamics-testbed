@@ -69,21 +69,16 @@ class Controller:
             self.control_loop()
         
         self.lc.unsubscribe(self.robot_subscription)
-
-        if self.save_data:
-            self.write_data()
         
         if self.plot_data:
-            self.t_save         = np.array(self.t_save)
-            self.q_save         = np.array(self.q_save)
-            self.q_d_save       = np.array(self.q_d_save)
-            self.dq_save        = np.array(self.dq_save)
-            self.dq_d_save      = np.array(self.dq_d_save)
-            self.tau_save       = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)     # normalize measured torque
-            self.tau_d_save     = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0) # normalize desired torque
-            self.ext_force_save = np.array(self.ext_force_save)
-            self.EFpose_save    = np.array(self.EFpose_save)
+            self.q_save     = np.array(self.q_save) - np.mean(self.q_save[0:50], axis=0)         # normalize measured position
+            # self.q_save     = np.array(self.q_d_save) - np.mean(self.q_d_save[0:50], axis=0)         # normalize measured position
+            self.tau_save   = np.array(self.tau_save) - np.mean(self.tau_save[0:50], axis=0)     # normalize measured torque
+            self.tau_d_save = np.array(self.tau_d_save) - np.mean(self.tau_d_save[0:50], axis=0) # normalize desired torque
             self.show_plot()
+        
+        if self.save_data:
+            self.write_data()
     
     def message(self, string):
         print("-----")
@@ -99,7 +94,7 @@ class Controller:
         satellite_time = 7.5
         motor_time     = 1.
         robot_time     = 1. + satellite_time - 3. # adjust robot starting time to reach contact point
-        gripper_time   = 1. + satellite_time      # adjust gripper starting time to reach contact point
+        gripper_time   = 1. + satellite_time - 0.5     # adjust gripper starting time to reach contact point
         
         q_fix = -0.02 # adjust position at the end of the trajectory to reach contact point
         gripper_width = 0.02
@@ -112,11 +107,11 @@ class Controller:
         Kd_wait = np.array([1., 1., 1., 1., 1., 1., 1.])
 
         """ trajectory phase """
-        Kp_traj = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+        Kp_traj = np.array([2.7, 0.1, 0.1, 0.5, 0.1, 0.1, 0.1])
         Kd_traj = np.array([0.3, 0., 0., 0., 0., 0., 0.])
 
         """ damping phase """
-        Kd_damp = np.array([0.1, 0.1, 1.0, 0.1, 0.1, 0.1, 0.1])
+        Kd_damp = np.array([0.0, 0.0, 1.0, 1.0, 0.1, 0.1, 0.1])
         # Kd_damp = np.array([0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5])
 
         self.message("loop started")
@@ -271,7 +266,7 @@ class Controller:
 
         plt.figure()
         plt.plot(self.t_save, self.q_save)
-        plt.plot(self.t_save, self.q_d_save)
+        # plt.plot(self.t_save, self.q_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint position [rad]")
         plt.legend(labels, loc="best")
@@ -280,7 +275,7 @@ class Controller:
 
         plt.figure()
         plt.plot(self.t_save, self.dq_save)
-        plt.plot(self.t_save, self.dq_d_save)
+        # plt.plot(self.t_save, self.dq_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint velocity [rad/s]")
         plt.legend(labels, loc="best")
@@ -314,7 +309,6 @@ class Controller:
         plt.savefig("end_effector_position.png")
         plt.grid()
 
-        plt.show()
         
 if __name__ == "__main__":
     controller = Controller("ROBOT COMMAND", 

@@ -28,7 +28,6 @@ class Handler
         void handleMessage(const lcm::ReceiveBuffer* rbuf,
                 const std::string& chan, 
                 const frankalcm::gripper_command* msg_received){
-              std::cout << "waiting ..." << std::endl;
               gcm_struct.width = msg_received->width;
               gcm_struct.speed = msg_received->speed;
               gcm_struct.force = msg_received->force;

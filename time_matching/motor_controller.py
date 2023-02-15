@@ -103,7 +103,7 @@ class motor_controller:
         plt.legend(["measured", "filtered"], loc='best')
         plt.grid()
         plt.savefig("satellite_velocity.png")
-        plt.show()
+        #plt.show()
     
     def write_data(self):
         output = open("satellite_velocity", "w")

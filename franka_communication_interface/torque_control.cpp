@@ -64,7 +64,7 @@ try {
     setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_goal = {{0.5, 0.117397, -0.19942, -2.22072, -1.32267, 1.43232, 1.61111}};
+    std::array<double, 7> q_goal = {{0.5, 0.117397, -0.19942, -2.2666, -1.32267, 1.43232, 1.61111}};
     MotionGenerator motion_generator(0.5, q_goal);
 
     robot.control(motion_generator);
