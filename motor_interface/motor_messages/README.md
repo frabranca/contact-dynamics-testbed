@@ -1,0 +1,2 @@
+### Franka Communication Interface
+This folder contains the C++ files used as interface with the franka robot. If the exchanged variables in the channels are unchanged, different controllers can be implemented in python without having to change anything in C++. However, the `torque_control.cpp` file can be changed, for example to modify the initial position of the robot before the controller is implemented.
