@@ -1,5 +1,7 @@
 ## Contact Dynamics Test Bed
 
+![](video.mp4)
+
 # Franka Robot Arm Driver
 The Franka PANDA research robot is controlled with LCM bindings between C++ and Python. The C++ codes use the franka library (https://frankaemika.github.io/docs/libfranka.html).
 
