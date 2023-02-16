@@ -28,7 +28,7 @@ Additionally, the executables `echo_robot_state`, `zero_torque`, `time_measure`,
 To operate the motor, the bash file `motor_init.sh` has to be run. This initiates the communication via can port with the motor. This command has to be executed until the output says "state UP".
 
 # Running the driver
-Two different drivers were made, using different method. The first one is using the time matching method and is run using `tm_driver.sh`, while the second one is using the double closed loop method and is run using `dcl_driver.sh`. Both of the drivers run the `torque_control.cpp` and `gripper_control.cpp`, which remain unchanged regardless of the method used. The difference between the drivers is in the files `controller.py` and `motor_controller.py`.
+Two different drivers were made, using different method. The first one is using the time matching method and is run using `tm_driver.sh`, while the second one is using the closed loop method and is run using `cl_driver.sh`. Both of the drivers run the `torque_control.cpp` and `gripper_control.cpp`, which remain unchanged regardless of the method used. The difference between the drivers is in the files `controller.py` and `motor_controller.py`.
 
 
 ```
@@ -36,6 +36,6 @@ chmod 755 tm_driver.sh
 ls -l tm_driver.sh
 ./tm_driver.sh
 chmod 755 dcl_driver.sh
-ls -l dcl_driver.sh
-./dcl_driver.sh
+ls -l cl_driver.sh
+./cl_driver.sh
 ```
