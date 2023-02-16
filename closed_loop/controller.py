@@ -116,7 +116,7 @@ class Controller:
         Kd_wait = np.array([1., 1., 1., 1., 1., 1., 1.])
 
         """ trajectory phase """
-        Kp_traj = np.array([2.7, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
+        Kp_traj = np.array([2., 0.1, 0.1, 0.1, 0.1, 0.1, 0.1])
         Kd_traj = np.array([0.3, 0., 0., 0., 0., 0., 0.])
 
         """ damping phase """
@@ -132,7 +132,7 @@ class Controller:
 
             # control logic -----------------------------------------------------------------------
             t = time.time() - start
-            t_robot = t - robot_time
+            # t_robot = t - robot_time
             
             # WAITING PHASE
             if (t <= robot_time):
@@ -148,15 +148,15 @@ class Controller:
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
             # set start point for robot trajectory phase
-            if self.sat_position <= -0.75 and robot_moved == False:
+            if self.sat_position <= -0.3 and robot_moved == False:
                 t_robot = time.time() - start
                 robot_moved = True
 
             # TRAJECTORY PHASE
-            if self.sat_position <= -0.75 and  self.sat_position >= -1.0:
-
-                q1_des  = 0.5 - 0.5*t_robot + 0.5 / np.pi *np.sin(np.pi * t_robot) + q_fix
-                dq1_des = -0.5 + 0.5*np.cos(np.pi * t_robot)
+            if self.sat_position <= -0.3 and  self.sat_position >= -1.0:
+                print(t-t_robot)
+                q1_des  = 0.5 - 0.5*(t-t_robot) + 0.5 / np.pi *np.sin(np.pi * (t-t_robot)) + q_fix
+                dq1_des = -0.5 + 0.5*np.cos(np.pi * (t-t_robot))
 
                 q_des = np.array([q1_des, 0., 0., 0., 0., 0., 0.])
                 dq_des = np.array([dq1_des, 0., 0., 0., 0., 0., 0.])
@@ -287,7 +287,7 @@ class Controller:
 
         plt.figure()
         plt.plot(self.t_save, self.q_save)
-        plt.plot(self.t_save, self.q_d_save)
+        # plt.plot(self.t_save, self.q_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint position [rad]")
         plt.legend(labels, loc="best")
@@ -296,7 +296,7 @@ class Controller:
 
         plt.figure()
         plt.plot(self.t_save, self.dq_save)
-        plt.plot(self.t_save, self.dq_d_save)
+        # plt.plot(self.t_save, self.dq_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint velocity [rad/s]")
         plt.legend(labels, loc="best")
@@ -305,7 +305,7 @@ class Controller:
             
         plt.figure()
         plt.plot(self.t_save, self.tau_save)
-        plt.plot(self.t_save, self.tau_d_save)
+        # plt.plot(self.t_save, self.tau_d_save)
         plt.xlabel("time [s]")
         plt.ylabel("joint torque [Nm]")
         plt.legend(labels, loc="best")
