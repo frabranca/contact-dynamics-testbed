@@ -96,7 +96,7 @@ class Controller:
         robot_time     = 1. + satellite_time - 3. # adjust robot starting time to reach contact point
         gripper_time   = 1. + satellite_time - 0.5     # adjust gripper starting time to reach contact point
         
-        q_fix = -0.02 # adjust position at the end of the trajectory to reach contact point
+        q_fix = -0.07 # adjust position at the end of the trajectory to reach contact point
         gripper_width = 0.02
         gripper_speed = 10.0
         gripper_force = 60.0
@@ -135,7 +135,7 @@ class Controller:
                 dq_error = dq_des - self.dq
 
                 # robot acts as a damper hold the position before the trajectory is followed
-                rcm.tau =  Kd_wait * dq_error
+                rcm.tau = Kd_wait * dq_error 
                 self.lc.publish(self.rcm_channel, rcm.encode())
             
             # TRAJECTORY PHASE

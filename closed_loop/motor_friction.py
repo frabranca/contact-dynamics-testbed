@@ -30,7 +30,7 @@ Kd = 5
 tau_des = 0.15
 vel_meas = 0
 
-while (time.time()-start) < 15.:
+while (time.time()-start) < 30.:
     if (time.time()-start) < 3.:
         torque = tau_friction(vel_meas) + tau_des
         pos_meas, vel_meas, tau_meas = motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
