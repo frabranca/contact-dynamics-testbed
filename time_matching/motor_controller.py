@@ -121,3 +121,7 @@ if __name__=="__main__":
     can_port = 'can0'
     motor_id = 3
     motor_controller(can_port, motor_id, 0.088, 20)
+    # motor_controller(can_port, motor_id, 0.09, 15)
+    # motor_controller(can_port, motor_id, 0.09, 10)
+
+

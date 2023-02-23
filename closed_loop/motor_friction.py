@@ -12,7 +12,9 @@ vel_ = []
 tau_ = []
 vel_filter = []
 
-cf = 0.095
+# cf = 0.095 # v=20
+# cf = 0.09 # v=15
+cf = 0.088
 
 def tau_friction(v):
     return cf*np.arctan(100*v)
@@ -24,13 +26,13 @@ start = time.time()
 i=0
 
 pos_des = 0
-vel_des = 20
+vel_des = 10
 Kp = 0
 Kd = 5
 tau_des = 0.15
 vel_meas = 0
 
-while (time.time()-start) < 30.:
+while (time.time()-start) < 15.:
     if (time.time()-start) < 3.:
         torque = tau_friction(vel_meas) + tau_des
         pos_meas, vel_meas, tau_meas = motor.send_deg_command(pos_des, vel_des, Kp, Kd, torque)
