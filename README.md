@@ -38,6 +38,13 @@
 
 5) After the capture, reopen the gripper from the button on top.
 
+### Switch off Franka Robot Arm
+1) Attach the Ethernet cable to the port below the FCI control box.
+2) Keep the network settings the same as before.
+3) Open the terminal and write `ssh@administrator 192.168.131.1`
+4) Enter the password: `clearpath`.
+5) Write `sudo shutdown now`.
+
 # Setting up another PC
 If a different PC is used for controlling the testbed, the following instructions have to be followed.
 ### Franka Robot Arm Driver
