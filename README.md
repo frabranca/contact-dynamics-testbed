@@ -56,8 +56,9 @@ To operate the robot libfranka has to be installed, while for real time communic
 The instructions to install LCM be found on https://lcm-proj.github.io/.
 
 ### Build Executable Files
-Use following commands to build the executable files `torque_control` and `gripper_control` in the build directory:
+After cloning the repository, use following commands to build the executable files `torque_control` and `gripper_control` in the build directory:
 ```
+cd contact-dynamics-testbed
 mkdir build
 cd build
 cmake ..
