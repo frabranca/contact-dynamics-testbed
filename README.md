@@ -5,14 +5,12 @@
 # Instructions
 ### Franka Robot Arm Hardware Setup
 1) Switch on the robot and plug the Ethernet cable directly to the FCI control box. 
-2) Switch on the PC and access the real-time kernel from the grub menu ->advanced options->5.9.1-rt20
-3) PC password for Francesco Branca user: frankapc22
-4) Change the wired network settings of IPv4 to manual. 
+2) Change the wired network settings of IPv4 to manual. 
     - Set the address to `192.168.131.x`, where x can be any number.
     - Set the netmask to `255.255.255.0`.
-5) Open the web browser and enter the address `192.168.131.40`. The Franka Emika desk will open.
-6) Unlock the joints from both the wireless remote control and from the desk by pressing on the unlock button.
-7) For the pilot mode select the gripper icon. In this way the gripper can be opened and closed using the buttons on the robot.
+3) Open the web browser and enter the address `192.168.131.40`. The Franka Emika desk will open.
+4) Unlock the joints from both the wireless remote control and from the desk by pressing on the unlock button.
+5) For the pilot mode select the gripper icon. In this way the gripper can be opened and closed using the buttons on the robot.
 
 ### Motor Hardware Setup
 1) Connect the motor to the generator and to the CAN-to-USB cable.
